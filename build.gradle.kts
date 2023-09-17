@@ -22,15 +22,12 @@ dependencies {
     })
 
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.7")
-    implementation("org.khelekore:prtree:1.5.0")
-    implementation("com.owen1212055:particlehelper:1.0.0-20221016.192224-7")
     compileOnly("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.8.2")
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.7")
 }
 
 bukkit {
-    main = "com.stifflered.tcchallenge.TCChallenge"
+    main = "com.stifflered.bartercontainer.BarterContainer"
     name = rootProject.name
     apiVersion = "1.19"
     version = "1.0.0"
@@ -51,7 +48,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.19.2")
+        minecraftVersion("1.20.1")
     }
 
 }
