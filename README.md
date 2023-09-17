@@ -1,2 +1,2 @@
 # BarterContainer
-A bartering chest plugin
+A bartering chest plugin built for MineHa.us
