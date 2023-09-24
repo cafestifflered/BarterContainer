@@ -8,8 +8,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class JoinEventListener implements Listener {
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void playerJoin(PlayerJoinEvent event) {
-        event.getPlayer().getInventory().addItem(ItemInstances.SHOP_LISTER_ITEM.getItem());
-    }
+//    @EventHandler(priority = EventPriority.LOWEST)
+//    public void playerJoin(PlayerJoinEvent event) {
+//        event.getPlayer().getInventory().addItem(ItemInstances.SHOP_LISTER_ITEM.getItem());
+//    }
 }

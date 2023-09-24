@@ -5,13 +5,19 @@ import com.stifflered.bartercontainer.barter.permission.BarterRole;
 import com.stifflered.bartercontainer.gui.tree.BarterBuyGui;
 import com.stifflered.bartercontainer.gui.tree.BarterGui;
 import com.stifflered.bartercontainer.store.BarterStore;
+import com.stifflered.bartercontainer.util.Sounds;
 import org.bukkit.block.Block;
+import org.bukkit.block.Container;
+import org.bukkit.block.Hopper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class BarterBlockListener implements Listener {
@@ -20,25 +26,36 @@ public class BarterBlockListener implements Listener {
     public void protect(BlockBreakEvent event) {
         BarterStore barterStore = BarterManager.INSTANCE.getBarter(event.getBlock().getLocation());
         if (barterStore != null) {
-            event.setCancelled(barterStore.canBreak(event.getPlayer()));
+            event.setCancelled(!barterStore.canBreak(event.getPlayer()));
         }
     }
-//
-//    @EventHandler
-//    public void drop(BlockDropItemEvent event) {
-//        ImportantBlock importantBlock = this.fromLocation(event.getBlock().getLocation());
-//        if (importantBlock != null) {
-//            importantBlock.mutateDrops(event.getPlayer(), event.getItems());
-//        }
-//    }
-//
-//    @EventHandler
-//    public void change(EntityChangeBlockEvent event) {
-//        ImportantBlock importantBlock = this.fromLocation(event.getBlock().getLocation());
-//        if (importantBlock != null) {
-//            event.setCancelled(true);
-//        }
-//    }
+
+    @EventHandler
+    public void drop(BlockExplodeEvent event) {
+        event.blockList().removeIf((block) -> { return BarterManager.INSTANCE.getBarter(block.getLocation()) != null;});
+    }
+
+    @EventHandler
+    public void drop(EntityExplodeEvent event) {
+        event.blockList().removeIf((block) -> { return BarterManager.INSTANCE.getBarter(block.getLocation()) != null;});
+    }
+
+    @EventHandler
+    public void change(InventoryMoveItemEvent event) {
+        if (event.getDestination().getHolder(false) instanceof Hopper hopper) {
+            BarterStore barterStore = BarterManager.INSTANCE.getBarter(hopper.getLocation());
+            if (barterStore != null) {
+                event.setCancelled(true);
+            }
+        }
+
+        if (event.getSource().getHolder(false) instanceof Hopper hopper) {
+            BarterStore barterStore = BarterManager.INSTANCE.getBarter(hopper.getLocation());
+            if (barterStore != null) {
+                event.setCancelled(true);
+            }
+        }
+    }
 //
 //    @EventHandler
 //    public void fade(BlockFadeEvent event) {
@@ -106,6 +123,7 @@ public class BarterBlockListener implements Listener {
 
         BarterStore barterStore = BarterManager.INSTANCE.getBarter(block.getLocation());
         if (barterStore != null) {
+            Sounds.openChest(player);
             if (barterStore.getRole(player) == BarterRole.UPKEEPER || player.hasPermission("barterchests.edit_all")) {
                 if (player.isSneaking()) {
                     new BarterBuyGui(player, barterStore).show(player);

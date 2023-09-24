@@ -1,5 +1,6 @@
 package com.stifflered.bartercontainer.command;
 
+import com.stifflered.bartercontainer.item.ItemInstances;
 import com.stifflered.bartercontainer.util.Components;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
@@ -20,6 +21,7 @@ public class BarterContainerCommand extends BukkitCommand {
             return true;
         }
 
+        player.getInventory().addItem(ItemInstances.SHOP_LISTER_ITEM.getItem());
         return true;
     }
 }

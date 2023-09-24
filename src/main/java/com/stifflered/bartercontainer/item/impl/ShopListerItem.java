@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -22,7 +23,7 @@ import java.util.UUID;
 
 public class ShopListerItem extends ItemInstance {
 
-    private static final Component SHOP_INVALID_BLOCK = Components.prefixedError(Component.text("The block you assigned is not a valid container!"));
+    private static final Component SHOP_INVALID_BLOCK = Components.prefixedError(Component.text("The block you clicked is not a valid container!"));
     private static final Component NO_PERMISSION = Components.prefixedError(Component.text("No permission!"));
 
     private static final Sound ACTIVATED_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BEACON_ACTIVATE, Sound.Source.BLOCK, 1, 1);
@@ -54,8 +55,17 @@ public class ShopListerItem extends ItemInstance {
             return;
         }
 
+        if (block.getType() != Material.BARREL) {
+            player.sendMessage(SHOP_INVALID_BLOCK);
+            return;
+        }
+
         BlockState state = block.getState(false);
         if (state instanceof TileState tileState) {
+            if (tileState instanceof Container container && !container.getInventory().isEmpty()) {
+                player.sendMessage(Components.prefixedError(Component.text("You can only convert empty containers!")));
+                return;
+            }
             BarterManager.INSTANCE.getSerializer().saveBarterStore(
                     new BarterStoreImpl(new BarterSerializer.BarterStoreKeyImpl(UUID.randomUUID()), player.getPlayerProfile(), new ArrayList<>(), new ArrayList<>(), new ItemStack(Material.DIAMOND)),
                     tileState.getPersistentDataContainer()

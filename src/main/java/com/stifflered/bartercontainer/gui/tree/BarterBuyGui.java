@@ -11,6 +11,7 @@ import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.util.Components;
 import com.stifflered.bartercontainer.util.ItemUtil;
 import com.stifflered.bartercontainer.util.Messages;
+import com.stifflered.bartercontainer.util.Sounds;
 import me.sashak.inventoryutil.ItemRemover;
 import me.sashak.inventoryutil.slotgroup.SlotGroups;
 import net.kyori.adventure.text.Component;
@@ -80,8 +81,9 @@ public class BarterBuyGui extends ChestGui {
         StaticPane itemDisplay = ItemUtil.wrapGui(this.getInventoryComponent(), 0, 2, 9, 3);
         {
             ItemUtil.listItems(itemDisplay, getBuyItems(store).stream().filter(Objects::nonNull).map(buySlot -> new GuiItem(buySlot.item, mainBuyClick -> {
+                Sounds.choose(player);
                 ItemStack previewItem = Objects.requireNonNullElse(store.getSaleStorage().getItem(buySlot.slot()), new ItemStack(Material.AIR)).clone();
-                pane.addItem(new GuiItem(ItemUtil.wrapEdit(previewItem, (meta) -> {
+                pane.addItem(new GuiItem(ItemUtil.wrapEdit(previewItem.clone(), (meta) -> {
                     Components.name(meta, Component.text("☑ Confirm Purchase", TextColor.color(0, 255, 0), TextDecoration.BOLD, TextDecoration.UNDERLINED));
                     Components.lore(meta, Components.miniSplit("""
                                 <gray>Click to <green>confirm</green>
@@ -96,6 +98,7 @@ public class BarterBuyGui extends ChestGui {
                         player.closeInventory();
                         return;
                     }
+                    Sounds.purchase(player);
                     if (me.sashak.inventoryutil.ItemUtil.hasAllItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice())) {
                         HashMap<Integer, ItemStack> leftOver = store.getCurrencyStorage().addItem(store.getCurrentItemPrice());
                         if (leftOver.isEmpty()) {
