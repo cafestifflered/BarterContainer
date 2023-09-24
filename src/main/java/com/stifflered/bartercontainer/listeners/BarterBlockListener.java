@@ -7,6 +7,7 @@ import com.stifflered.bartercontainer.gui.tree.BarterGui;
 import com.stifflered.bartercontainer.store.BarterStore;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -111,8 +112,10 @@ public class BarterBlockListener implements Listener {
                 } else {
                     new BarterGui(barterStore).show(player);
                 }
+                event.setUseInteractedBlock(Event.Result.DENY);
             } else {
                 new BarterBuyGui(player, barterStore).show(player);
+                event.setUseInteractedBlock(Event.Result.DENY);
             }
         }
     }

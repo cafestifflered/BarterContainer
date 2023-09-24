@@ -27,27 +27,14 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class BarterBuyGui extends ChestGui {
 
-    private static final ItemStack BUY_ITEM_ARROW = ItemUtil.wrapEdit(new ItemStack(Material.PLAYER_HEAD), (meta) -> {
-        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), "HEAD");
-        profile.getProperties().add(new ProfileProperty("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4M2JiY2NmNGYwYzg2YjEyZjZmNzk5ODlkMTU5NDU0YmY5MjgxOTU1ZDdlMjQxMWNlOThjMWI4YWEzOGQ4In19fQ=="));
-        ((SkullMeta) meta).setPlayerProfile(profile);
-
-        Components.name(meta, Component.text("Buying Item", TextColor.color(0, 255, 0)));
-        Components.lore(meta, Components.miniSplit("""
-                    <gray>The item located <green>under</green> the arrow
-                    <gray>will be purchased.
-                    <gray>Click the candle to confirm.""")
-        );
-    });
-
     private static final ItemStack BUY_ITEM = ItemUtil.wrapEdit(new ItemStack(Material.LIME_CANDLE), (meta) -> {
-        Components.name(meta, Component.text("☑ Buy Item", TextColor.color(0, 255, 0)));
+        Components.name(meta, Component.text("◎ Open Shop", TextColor.color(0, 255, 0)));
         Components.lore(meta, Components.miniSplit("""
-                    <gray>Click the item to <green>buy</green> the item
-                    <gray>located on top.""")
+                    <gray>Click an item to <green>buy</green>.""")
         );
     });
 
@@ -88,11 +75,41 @@ public class BarterBuyGui extends ChestGui {
         }
 
         pane.addItem(new GuiItem(SetPriceGuiItem.getPriceItem(store)),4, 0);
-        pane.addItem(new GuiItem(BUY_ITEM_ARROW),0, 1);
+       // pane.addItem(new GuiItem(BUY_ITEM_ARROW),0, 1);
 
         StaticPane itemDisplay = ItemUtil.wrapGui(this.getInventoryComponent(), 0, 2, 9, 3);
         {
-            ItemUtil.listItems(itemDisplay, getBuyItems(store).stream().filter(Objects::nonNull).map(GuiItem::new).toList());
+            ItemUtil.listItems(itemDisplay, getBuyItems(store).stream().filter(Objects::nonNull).map(buySlot -> new GuiItem(buySlot.item, mainBuyClick -> {
+                ItemStack previewItem = Objects.requireNonNullElse(store.getSaleStorage().getItem(buySlot.slot()), new ItemStack(Material.AIR)).clone();
+                pane.addItem(new GuiItem(ItemUtil.wrapEdit(previewItem, (meta) -> {
+                    Components.name(meta, Component.text("☑ Confirm Purchase", TextColor.color(0, 255, 0), TextDecoration.BOLD, TextDecoration.UNDERLINED));
+                    Components.lore(meta, Components.miniSplit("""
+                                <gray>Click to <green>confirm</green>
+                                <gray>your purchase.""")
+                    );
+                    ItemUtil.glow(meta);
+                }), (event) -> {
+
+                    ItemStack itemStack = Objects.requireNonNullElse(store.getSaleStorage().getItem(buySlot.slot()), new ItemStack(Material.AIR)).clone();
+                    if (!previewItem.equals(itemStack)) {
+                        player.sendMessage(Components.prefixedError(Component.text("Looks like someone already took this item!")));
+                        player.closeInventory();
+                        return;
+                    }
+                    if (me.sashak.inventoryutil.ItemUtil.hasAllItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice())) {
+                        HashMap<Integer, ItemStack> leftOver = store.getCurrencyStorage().addItem(store.getCurrentItemPrice());
+                        if (leftOver.isEmpty()) {
+                            ItemRemover.removeItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice());
+                            store.getSaleStorage().setItem(buySlot.slot, null);
+
+                            ItemUtil.giveItemOrThrow(player, itemStack);
+                        }
+                        new BarterBuyGui(player, store).show(event.getWhoClicked());
+                    }
+                }), 4, 1);
+
+                BarterBuyGui.this.show(mainBuyClick.getWhoClicked());
+            })).toList());
         }
 
         boolean hasSlots = me.sashak.inventoryutil.ItemUtil.hasAllItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice());
@@ -100,60 +117,37 @@ public class BarterBuyGui extends ChestGui {
             pane.addItem(new GuiItem(NOT_ENOUGH_PRICE), 4, 1);
             return;
         }
+        boolean hasRoom = me.sashak.inventoryutil.ItemUtil.hasRoomForItems(store.getCurrencyStorage(), SlotGroups.ENTIRE_INV, store.getCurrentItemPrice());
+        if (!hasRoom) {
+            pane.addItem(new GuiItem(SHOP_FULL), 4, 1);
+            return;
+        }
 
         boolean isEmpty = store.getSaleStorage().isEmpty();
-        if (!isEmpty) {
-            pane.addItem(new GuiItem(BUY_ITEM, (clickEvent) -> {
-                pane.addItem(new GuiItem(ItemUtil.wrapEdit(getBuyItems(store).get(0).clone(), (meta) -> {
-                    Components.name(meta, Component.text("☑ Confirm Purchase", TextColor.color(0, 255, 0), TextDecoration.BOLD, TextDecoration.UNDERLINED));
-                    Components.lore(meta, Components.miniSplit("""
-                    <gray>Click to <green>confirm</green>
-                    <gray>your purchase.""")
-                    );
-                    ItemUtil.glow(meta);
-                }), (event) -> {
-                    ListIterator<ItemStack> iterator = store.getSaleStorage().iterator();
-
-                    while (iterator.hasNext()) {
-                        int slot = iterator.nextIndex();
-                        ItemStack itemStack = iterator.next();
-
-                        if (itemStack != null && me.sashak.inventoryutil.ItemUtil.hasAllItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice())) {
-                            HashMap<Integer, ItemStack> leftOver = store.getCurrencyStorage().addItem(store.getCurrentItemPrice());
-                            if (leftOver.isEmpty()) {
-                                ItemRemover.removeItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice());
-                                store.getSaleStorage().setItem(slot, null);
-
-                                ItemUtil.giveItemOrThrow(player, itemStack);
-
-                                new BarterBuyGui(player, store).show(event.getWhoClicked());
-                            } else {
-                                player.closeInventory();
-                                Messages.error(player, Components.prefixedError(Component.text("Barter shop's bank is full!")));
-                            }
-
-                            break;
-                        }
-
-                    }
-                }), 4, 1);
-
-                BarterBuyGui.this.show(clickEvent.getWhoClicked());
-            }), 4, 1);
-        } else {
+        if (isEmpty) {
             pane.addItem(new GuiItem(OUT_OF_STOCK), 4, 1);
+            return;
         }
+
+        pane.addItem(new GuiItem(BUY_ITEM), 4, 1);
     }
 
-    public static List<ItemStack> getBuyItems(BarterStore store) {
-        List<ItemStack> itemStacks = new ArrayList<>();
+    public static List<BuySlot> getBuyItems(BarterStore store) {
+        List<BuySlot> itemStacks = new ArrayList<>();
 
-        for (ItemStack itemStack : store.getSaleStorage()) {
+        ListIterator<ItemStack> iterator = store.getSaleStorage().iterator();
+        while (iterator.hasNext()) {
+            int slot = iterator.nextIndex();
+            ItemStack itemStack = iterator.next();
             if (itemStack != null) {
-                itemStacks.add(itemStack.clone());
+                itemStacks.add(new BuySlot(slot, itemStack.clone()));
             }
         }
 
         return itemStacks;
+    }
+
+    record BuySlot(int slot, ItemStack item) {
+
     }
 }
