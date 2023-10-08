@@ -2,6 +2,7 @@ package com.stifflered.bartercontainer;
 
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.command.BarterContainerCommand;
+import com.stifflered.bartercontainer.item.ItemInstances;
 import com.stifflered.bartercontainer.listeners.BarterBlockListener;
 import com.stifflered.bartercontainer.listeners.ItemInstanceListener;
 import com.stifflered.bartercontainer.listeners.JoinEventListener;
@@ -19,6 +20,7 @@ public class BarterContainer extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        ItemInstances.SHOP_LISTER_ITEM.getItem(); // Load ITEM_INSTANCES
         INSTANCE = this;
         Bukkit.getCommandMap().register("bartercontainer", new BarterContainerCommand());
 
