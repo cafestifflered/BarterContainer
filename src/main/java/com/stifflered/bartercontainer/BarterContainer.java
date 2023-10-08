@@ -20,8 +20,8 @@ public class BarterContainer extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        ItemInstances.SHOP_LISTER_ITEM.getItem(); // Load ITEM_INSTANCES
         INSTANCE = this;
+        ItemInstances.SHOP_LISTER_ITEM.getItem(); // Load ITEM_INSTANCES
         Bukkit.getCommandMap().register("bartercontainer", new BarterContainerCommand());
 
         this.register(
