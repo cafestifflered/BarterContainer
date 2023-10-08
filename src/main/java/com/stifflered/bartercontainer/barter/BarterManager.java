@@ -3,15 +3,22 @@ package com.stifflered.bartercontainer.barter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.stifflered.bartercontainer.store.BarterStore;
+import com.stifflered.bartercontainer.store.BarterStoreImpl;
 import com.stifflered.bartercontainer.store.BarterStoreKey;
+import com.stifflered.bartercontainer.util.Components;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class BarterManager {
 
@@ -65,11 +72,37 @@ public class BarterManager {
         return false;
     }
 
+    // TODO:
+    public void unload(Chunk chunk) {
+        List<Location> toRemove = new ArrayList<>();
+        for (Location location : this.barterStoreMap.keySet()) {
+            if (Chunk.getChunkKey(location) == chunk.getChunkKey()) {
+                toRemove.add(location);
+            }
+        }
+        for (Location remove : toRemove) {
+            this.save(remove, this.barterStoreMap.remove(remove));
+        }
+    }
+
+    public void save(Location location, BarterStore barterStore) {
+        BlockState state = location.getBlock().getState(false);
+        if (state instanceof TileState tileState) {
+            BarterManager.INSTANCE.getSerializer().saveBarterStore(barterStore, tileState.getPersistentDataContainer());
+        }
+    }
+
     public BarterSerializer getSerializer() {
         return serializer;
     }
 
     public void removeBarter(Location location) {
         this.barterStoreMap.remove(location);
+    }
+
+    public void saveAll() {
+        for (Map.Entry<Location, BarterStore> entry : this.barterStoreMap.entrySet()) {
+            this.save(entry.getKey(), entry.getValue());
+        }
     }
 }

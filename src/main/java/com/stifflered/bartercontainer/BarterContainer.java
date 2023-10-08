@@ -1,5 +1,6 @@
 package com.stifflered.bartercontainer;
 
+import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.command.BarterContainerCommand;
 import com.stifflered.bartercontainer.listeners.BarterBlockListener;
 import com.stifflered.bartercontainer.listeners.ItemInstanceListener;
@@ -56,6 +57,7 @@ public class BarterContainer extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        BarterManager.INSTANCE.saveAll();
     }
 
     // TODO
