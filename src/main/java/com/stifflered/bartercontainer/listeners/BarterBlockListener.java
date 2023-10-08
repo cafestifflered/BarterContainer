@@ -6,6 +6,7 @@ import com.stifflered.bartercontainer.gui.tree.BarterBuyGui;
 import com.stifflered.bartercontainer.gui.tree.BarterGui;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.util.Sounds;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Hopper;
@@ -24,9 +25,13 @@ public class BarterBlockListener implements Listener {
 
     @EventHandler
     public void protect(BlockBreakEvent event) {
-        BarterStore barterStore = BarterManager.INSTANCE.getBarter(event.getBlock().getLocation());
+        Location location = event.getBlock().getLocation();
+        BarterStore barterStore = BarterManager.INSTANCE.getBarter(location);
         if (barterStore != null) {
             event.setCancelled(!barterStore.canBreak(event.getPlayer()));
+            if (!event.isCancelled()) {
+                BarterManager.INSTANCE.removeBarter(location);
+            }
         }
     }
 

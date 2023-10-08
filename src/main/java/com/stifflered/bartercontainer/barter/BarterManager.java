@@ -68,4 +68,8 @@ public class BarterManager {
     public BarterSerializer getSerializer() {
         return serializer;
     }
+
+    public void removeBarter(Location location) {
+        this.barterStoreMap.remove(location);
+    }
 }

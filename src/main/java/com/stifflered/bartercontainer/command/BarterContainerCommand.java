@@ -16,7 +16,7 @@ public class BarterContainerCommand extends BukkitCommand {
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
         Player player = (Player) sender;
-        if (!sender.hasPermission("barterchests.admin.gui")) {
+        if (!sender.hasPermission("barterchests.admin")) {
             sender.sendMessage(Components.NO_PERMISSION);
             return true;
         }
