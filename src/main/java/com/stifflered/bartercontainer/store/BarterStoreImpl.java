@@ -2,6 +2,7 @@ package com.stifflered.bartercontainer.store;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.stifflered.bartercontainer.barter.permission.BarterRole;
+import com.stifflered.bartercontainer.util.Components;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -56,7 +57,18 @@ public class BarterStoreImpl implements BarterStore {
 
     @Override
     public boolean canBreak(Player player) {
-        return this.getRole(player) == BarterRole.UPKEEPER;
+        boolean upkeeper = this.getRole(player) == BarterRole.UPKEEPER;
+        if (upkeeper) {
+            boolean isEmpty = this.currencyHolder.isEmpty() && this.itemStacks.isEmpty();
+            if (isEmpty) {
+                return true;
+            } else {
+                player.sendMessage(Components.prefixedError(Component.text("You must empty both the Barter Bank and Shop Items.")));
+                return false;
+            }
+        }
+
+        return upkeeper;
     }
 
     @Override
