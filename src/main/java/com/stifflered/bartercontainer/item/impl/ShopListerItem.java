@@ -66,6 +66,11 @@ public class ShopListerItem extends ItemInstance {
                 player.sendMessage(Components.prefixedError(Component.text("You can only convert empty containers!")));
                 return;
             }
+            if (BarterManager.INSTANCE.getBarter(tileState.getLocation()) != null) {
+                player.sendMessage(Components.prefixedError(Component.text("There is already a barter container at this location.")));
+                return;
+            }
+
             BarterManager.INSTANCE.getSerializer().saveBarterStore(
                     new BarterStoreImpl(new BarterSerializer.BarterStoreKeyImpl(UUID.randomUUID()), player.getPlayerProfile(), new ArrayList<>(), new ArrayList<>(), new ItemStack(Material.DIAMOND)),
                     tileState.getPersistentDataContainer()
