@@ -21,7 +21,7 @@ dependencies {
         include("**/*.jar")
     })
 
-    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.7")
+    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.13")
     compileOnly("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.8.2")
 }

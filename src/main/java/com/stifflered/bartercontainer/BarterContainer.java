@@ -3,10 +3,7 @@ package com.stifflered.bartercontainer;
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.command.BarterContainerCommand;
 import com.stifflered.bartercontainer.item.ItemInstances;
-import com.stifflered.bartercontainer.listeners.BarterBlockListener;
-import com.stifflered.bartercontainer.listeners.ItemInstanceListener;
-import com.stifflered.bartercontainer.listeners.JoinEventListener;
-import com.stifflered.bartercontainer.listeners.SafeFireworkDamageListener;
+import com.stifflered.bartercontainer.listeners.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.Listener;
@@ -28,7 +25,8 @@ public class BarterContainer extends JavaPlugin implements Listener {
                 new ItemInstanceListener(),
                 new JoinEventListener(),
                 new SafeFireworkDamageListener(),
-                new BarterBlockListener()
+                new BarterBlockListener(),
+                new BarterInventoryListener()
         );
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {

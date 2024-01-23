@@ -2,6 +2,7 @@ package com.stifflered.bartercontainer.store;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.stifflered.bartercontainer.barter.permission.BarterRole;
+import com.stifflered.bartercontainer.store.owners.BankOwner;
 import com.stifflered.bartercontainer.util.Components;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -26,7 +27,7 @@ public class BarterStoreImpl implements BarterStore {
         for (ItemStack itemToAdd : itemStacks) {
             this.itemStacks.addItem(itemToAdd);
         }
-        this.currencyHolder = Bukkit.createInventory(null, 27);
+        this.currencyHolder = Bukkit.createInventory(new BankOwner(this), 27);
         for (ItemStack itemToAdd : currencyItems) {
             this.currencyHolder.addItem(itemToAdd);
         }

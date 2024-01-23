@@ -1,7 +1,5 @@
 package com.stifflered.bartercontainer.gui.tree;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
@@ -10,25 +8,17 @@ import com.stifflered.bartercontainer.gui.tree.buttons.SetPriceGuiItem;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.util.Components;
 import com.stifflered.bartercontainer.util.ItemUtil;
-import com.stifflered.bartercontainer.util.Messages;
 import com.stifflered.bartercontainer.util.Sounds;
 import me.sashak.inventoryutil.ItemRemover;
 import me.sashak.inventoryutil.slotgroup.SlotGroups;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class BarterBuyGui extends ChestGui {
 
@@ -68,9 +58,8 @@ public class BarterBuyGui extends ChestGui {
         });
 
         StaticPane pane = ItemUtil.wrapGui(this.getInventoryComponent(), 9, 5);
-
         for (int i = 0; i < 9; i++) {
-            GuiItem item = new GuiItem(new ItemStack(Material.GRAY_STAINED_GLASS_PANE), null);
+            GuiItem item = new GuiItem(new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
             pane.addItem(item, i, 0);
             pane.addItem(item, i, 1);
         }
@@ -81,6 +70,7 @@ public class BarterBuyGui extends ChestGui {
         StaticPane itemDisplay = ItemUtil.wrapGui(this.getInventoryComponent(), 0, 2, 9, 3);
         {
             ItemUtil.listItems(itemDisplay, getBuyItems(store).stream().filter(Objects::nonNull).map(buySlot -> new GuiItem(buySlot.item, mainBuyClick -> {
+
                 Sounds.choose(player);
                 ItemStack previewItem = Objects.requireNonNullElse(store.getSaleStorage().getItem(buySlot.slot()), new ItemStack(Material.AIR)).clone();
                 pane.addItem(new GuiItem(ItemUtil.wrapEdit(previewItem.clone(), (meta) -> {
@@ -111,7 +101,7 @@ public class BarterBuyGui extends ChestGui {
                     }
                 }), 4, 1);
 
-                BarterBuyGui.this.show(mainBuyClick.getWhoClicked());
+                BarterBuyGui.this.update();
             })).toList());
         }
 
