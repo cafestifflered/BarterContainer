@@ -21,7 +21,7 @@ public class BarterGui extends ChestGui {
 
         pane.addItem(new ViewContentsGuiItem(barterStore), 2, 1);
 
-        pane.addItem(new SetPriceGuiItem(barterStore, () -> new BarterGui(barterStore)), 4, 1);
+        pane.addItem(new SetPriceGuiItem(barterStore), 4, 1);
 
         pane.addItem(new ViewCurrencyGuiItem(barterStore), 6, 1);
     }

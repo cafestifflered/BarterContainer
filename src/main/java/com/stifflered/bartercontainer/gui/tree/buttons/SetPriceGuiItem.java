@@ -26,7 +26,7 @@ public class SetPriceGuiItem extends GuiItem {
             Component.text("Set Price")
     );
 
-    public SetPriceGuiItem(BarterStore store, Supplier<Gui> guiSupplier) {
+    public SetPriceGuiItem(BarterStore store) {
         super(ItemUtil.wrapEdit(new ItemStack(Material.PAPER), (meta) -> {
             Components.name(meta, Component.text("$ Set Price", TextColor.color(0, 255, 0)));
             Components.lore(meta, Components.miniSplit("""
@@ -36,12 +36,12 @@ public class SetPriceGuiItem extends GuiItem {
                     <gray>Current Price:</gray> <item>
                     """, Placeholder.component("item", getItemDescription(store.getCurrentItemPrice()))));
         }), (event) -> {
-            openEditMenu(store, guiSupplier, (Player) event.getWhoClicked());
+            openEditMenu(store, (Player) event.getWhoClicked());
         });
     }
 
-    public static void openEditMenu(BarterStore store, Supplier<Gui> parent, Player player) {
-        ChestGui gui = new SimpleInnerGui(1, HOLDER, parent);
+    public static void openEditMenu(BarterStore store, Player player) {
+        ChestGui gui = new SimpleInnerGui(1, HOLDER, null);
         gui.setOnTopClick((event) -> {
             event.setCancelled(true);
         });
@@ -69,7 +69,7 @@ public class SetPriceGuiItem extends GuiItem {
             }
 
             Sounds.choose(editEvent.getWhoClicked());
-            openEditMenu(store, parent, player);
+            openEditMenu(store, player);
         }), 4, 0);
 
         gui.show(player);
