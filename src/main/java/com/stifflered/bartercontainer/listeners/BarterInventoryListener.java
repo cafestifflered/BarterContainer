@@ -15,12 +15,12 @@ public class BarterInventoryListener implements Listener {
     @EventHandler
     public void protect(InventoryClickEvent event) {
         Inventory clickedInventory = event.getClickedInventory();
-        if (event.getAction() == MOVE_TO_OTHER_INVENTORY && event.getView().getTopInventory().getHolder() instanceof BankOwner owner) {
+        if (event.getAction() == MOVE_TO_OTHER_INVENTORY && event.getView().getTopInventory().getHolder() instanceof BankOwner) {
             event.setCancelled(true);
             return;
         }
 
-        if (clickedInventory != null && clickedInventory.getHolder() instanceof BankOwner owner) {
+        if (clickedInventory != null && clickedInventory.getHolder() instanceof BankOwner) {
             boolean cancel = switch (event.getAction()) {
                 case PICKUP_ALL -> false;
                 default -> true;
@@ -36,7 +36,7 @@ public class BarterInventoryListener implements Listener {
 
     @EventHandler
     public void protect(InventoryMoveItemEvent event) {
-        if (event.getDestination().getHolder() instanceof BankOwner owner) {
+        if (event.getDestination().getHolder() instanceof BankOwner) {
            event.setCancelled(true);
         }
     }
@@ -44,7 +44,7 @@ public class BarterInventoryListener implements Listener {
     @EventHandler
     public void protect(InventoryDragEvent event) {
         for (int slot : event.getRawSlots()) {
-            if (event.getView().getInventory(slot).getHolder() instanceof BankOwner owner) {
+            if (event.getView().getInventory(slot).getHolder() instanceof BankOwner) {
                 event.setCancelled(true);
             }
         }

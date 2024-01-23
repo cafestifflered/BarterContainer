@@ -8,7 +8,6 @@ import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.util.Sounds;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.Container;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

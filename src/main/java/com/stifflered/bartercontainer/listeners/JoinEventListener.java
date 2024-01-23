@@ -1,10 +1,6 @@
 package com.stifflered.bartercontainer.listeners;
 
-import com.stifflered.bartercontainer.item.ItemInstances;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 
 public class JoinEventListener implements Listener {
 

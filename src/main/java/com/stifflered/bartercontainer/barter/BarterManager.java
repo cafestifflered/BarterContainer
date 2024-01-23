@@ -3,22 +3,19 @@ package com.stifflered.bartercontainer.barter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.stifflered.bartercontainer.store.BarterStore;
-import com.stifflered.bartercontainer.store.BarterStoreImpl;
 import com.stifflered.bartercontainer.store.BarterStoreKey;
-import com.stifflered.bartercontainer.util.Components;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
 import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BarterManager {
 

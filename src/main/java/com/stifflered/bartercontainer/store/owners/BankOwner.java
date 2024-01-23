@@ -1,6 +1,5 @@
 package com.stifflered.bartercontainer.store.owners;
 
-import com.stifflered.bartercontainer.BarterContainer;
 import com.stifflered.bartercontainer.store.BarterStore;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
