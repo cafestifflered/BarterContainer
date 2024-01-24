@@ -5,6 +5,7 @@ public enum BarterPermission {
     EDIT_PRICE,
     REDEEM_ITEMS,
     EDIT_ITEMS,
+    DELETE
 
 
 }

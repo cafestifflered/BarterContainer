@@ -1,6 +1,7 @@
 package com.stifflered.bartercontainer.store;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.stifflered.bartercontainer.barter.permission.BarterPermission;
 import com.stifflered.bartercontainer.barter.permission.BarterRole;
 import com.stifflered.bartercontainer.store.owners.BankOwner;
 import com.stifflered.bartercontainer.util.Components;
@@ -58,8 +59,8 @@ public class BarterStoreImpl implements BarterStore {
 
     @Override
     public boolean canBreak(Player player) {
-        boolean upkeeper = this.getRole(player) == BarterRole.UPKEEPER;
-        if (upkeeper) {
+        boolean canDelete = this.getRole(player).hasPermission(BarterPermission.DELETE);
+        if (canDelete) {
             boolean isEmpty = this.currencyHolder.isEmpty() && this.itemStacks.isEmpty();
             if (isEmpty) {
                 return true;
@@ -69,7 +70,7 @@ public class BarterStoreImpl implements BarterStore {
             }
         }
 
-        return upkeeper;
+        return canDelete;
     }
 
     @Override
@@ -89,6 +90,10 @@ public class BarterStoreImpl implements BarterStore {
 
     @Override
     public BarterRole getRole(Player player) {
+        if (player.hasPermission("barterchests.admin")) {
+            return BarterRole.UPKEEPER;
+        }
+
         if (player.getUniqueId().equals(this.playerProfile.getId())) {
             return BarterRole.UPKEEPER;
         }
