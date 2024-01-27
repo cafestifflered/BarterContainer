@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class BarterContainerCommand extends BukkitCommand {
 
     public BarterContainerCommand() {
-        super("barterchests");
+        super("barterbarrels");
     }
 
     @Override

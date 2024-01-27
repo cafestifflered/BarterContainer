@@ -4,7 +4,9 @@ import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.barter.permission.BarterRole;
 import com.stifflered.bartercontainer.gui.tree.BarterBuyGui;
 import com.stifflered.bartercontainer.gui.tree.BarterGui;
+import com.stifflered.bartercontainer.item.ItemInstances;
 import com.stifflered.bartercontainer.store.BarterStore;
+import com.stifflered.bartercontainer.util.ItemUtil;
 import com.stifflered.bartercontainer.util.Sounds;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -30,6 +32,7 @@ public class BarterBlockListener implements Listener {
             event.setCancelled(!barterStore.canBreak(event.getPlayer()));
             if (!event.isCancelled()) {
                 BarterManager.INSTANCE.removeBarter(location);
+                ItemUtil.giveItemOrThrow(event.getPlayer(), ItemInstances.SHOP_LISTER_ITEM.getItem());
             }
         }
     }
