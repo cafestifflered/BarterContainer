@@ -51,6 +51,8 @@ public class BarterBuyGui extends ChestGui {
         );
     });
 
+    private boolean canBuy = false;
+
     public BarterBuyGui(Player player, BarterStore store) {
         super(5, ComponentHolder.of(store.getNameStyled()));
         this.setOnGlobalClick((event) -> {
@@ -70,7 +72,9 @@ public class BarterBuyGui extends ChestGui {
         StaticPane itemDisplay = ItemUtil.wrapGui(this.getInventoryComponent(), 0, 2, 9, 3);
         {
             ItemUtil.listItems(itemDisplay, getBuyItems(store).stream().filter(Objects::nonNull).map(buySlot -> new GuiItem(buySlot.item, mainBuyClick -> {
-
+                if (!this.canBuy) {
+                    return;
+                }
                 Sounds.choose(player);
                 ItemStack previewItem = Objects.requireNonNullElse(store.getSaleStorage().getItem(buySlot.slot()), new ItemStack(Material.AIR)).clone();
                 pane.addItem(new GuiItem(ItemUtil.wrapEdit(previewItem.clone(), (meta) -> {
@@ -123,6 +127,7 @@ public class BarterBuyGui extends ChestGui {
         }
 
         pane.addItem(new GuiItem(BUY_ITEM), 4, 1);
+        this.canBuy = true;
     }
 
     public static List<BuySlot> getBuyItems(BarterStore store) {
