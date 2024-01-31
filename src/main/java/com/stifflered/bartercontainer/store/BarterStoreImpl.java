@@ -25,13 +25,9 @@ public class BarterStoreImpl implements BarterStore {
         this.barterStoreKey = barterStoreKey;
         this.playerProfile = playerProfile;
         this.itemStacks = Bukkit.createInventory(null, 27);
-        for (ItemStack itemToAdd : itemStacks) {
-            this.itemStacks.addItem(itemToAdd);
-        }
+        this.itemStacks.setContents(itemStacks.toArray(new ItemStack[0]));
         this.currencyHolder = Bukkit.createInventory(new BankOwner(this), 27);
-        for (ItemStack itemToAdd : currencyItems) {
-            this.currencyHolder.addItem(itemToAdd);
-        }
+        this.currencyHolder.setContents(currencyItems.toArray(new ItemStack[0]));
         this.itemStack = itemStack;
     }
 

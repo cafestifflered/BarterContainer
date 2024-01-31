@@ -6,7 +6,9 @@ import com.stifflered.bartercontainer.store.BarterStoreImpl;
 import com.stifflered.bartercontainer.store.BarterStoreKey;
 import com.stifflered.bartercontainer.util.TagUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -33,8 +35,8 @@ public class BarterSerializer {
         container.set(NAME_UUID, PersistentDataType.STRING, playerProfile.getId().toString());
         container.set(NAME_PLAYER, PersistentDataType.STRING, playerProfile.getName());
 
-        this.storeItems(container, SHOP_ITEMS, Arrays.asList(barterStore.getSaleStorage().getContents()));
-        this.storeItems(container, CURRENCY_STORAGE, Arrays.asList(barterStore.getCurrencyStorage().getContents()));
+        this.storeItems(container, SHOP_ITEMS, barterStore.getSaleStorage());
+        this.storeItems(container, CURRENCY_STORAGE, barterStore.getCurrencyStorage());
 
         container.set(PRICE_ITEM, PersistentDataType.STRING, Base64.getEncoder().encodeToString(barterStore.getCurrentItemPrice().serializeAsBytes()));
     }
@@ -69,6 +71,8 @@ public class BarterSerializer {
         for (String base64 : container.get(namespacedKey, PersistentDataType.STRING).split(";")) {
             if (!base64.isEmpty()) {
                 itemStacks.add(ItemStack.deserializeBytes(Base64.getDecoder().decode(base64)));
+            } else {
+                itemStacks.add(new ItemStack(Material.AIR));
             }
         }
 
@@ -76,11 +80,13 @@ public class BarterSerializer {
     }
 
 
-    public void storeItems(PersistentDataContainer container, NamespacedKey namespacedKey, List<ItemStack> itemStacks) {
+    public void storeItems(PersistentDataContainer container, NamespacedKey namespacedKey, Inventory inventory) {
         List<String> strings = new ArrayList<>();
-        for (ItemStack itemStack : itemStacks) {
+        for (ItemStack itemStack : inventory.getContents()) {
             if (itemStack != null) {
                 strings.add(new String(Base64.getEncoder().encode(itemStack.serializeAsBytes())));
+            } else {
+                strings.add("");
             }
         }
 

@@ -26,7 +26,8 @@ public class BarterContainer extends JavaPlugin implements Listener {
                 new JoinEventListener(),
                 new SafeFireworkDamageListener(),
                 new BarterBlockListener(),
-                new BarterInventoryListener()
+                new BarterInventoryListener(),
+                new ChunkUnloadListener()
         );
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
