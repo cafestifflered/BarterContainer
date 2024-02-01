@@ -32,6 +32,9 @@ public class BarterManager {
         BarterStore barterStore = this.barterStoreMap.get(location);
         if (barterStore == null) {
             barterStore = this.getBarterAtLocation(location);
+        }
+
+        if (barterStore != null) {
             this.barterStoreMap.put(location, barterStore);
         }
 

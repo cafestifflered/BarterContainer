@@ -27,7 +27,6 @@ public class BarterSerializer {
     private static final NamespacedKey CURRENCY_STORAGE = TagUtil.of("currency_storage");
     private static final NamespacedKey PRICE_ITEM = TagUtil.of("price_item");
 
-    @Nullable
     public void saveBarterStore(BarterStore barterStore, PersistentDataContainer container) {
         container.set(BARTER_KEY, PersistentDataType.STRING, barterStore.getKey().key().toString());
 
