@@ -7,6 +7,7 @@ import com.stifflered.bartercontainer.store.owners.BankOwner;
 import com.stifflered.bartercontainer.util.Components;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -20,6 +21,7 @@ public class BarterStoreImpl implements BarterStore {
     private Inventory itemStacks;
     private Inventory currencyHolder;
     private ItemStack itemStack;
+    private Location location;
 
     public BarterStoreImpl(BarterStoreKey barterStoreKey, PlayerProfile playerProfile, List<ItemStack> itemStacks, List<ItemStack> currencyItems, ItemStack itemStack) {
         this.barterStoreKey = barterStoreKey;
@@ -95,5 +97,14 @@ public class BarterStoreImpl implements BarterStore {
         }
 
         return BarterRole.VISITOR;
+    }
+
+    @Override
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }

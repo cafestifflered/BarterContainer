@@ -4,8 +4,10 @@ import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHold
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.gui.tree.buttons.SetPriceGuiItem;
 import com.stifflered.bartercontainer.store.BarterStore;
+import com.stifflered.bartercontainer.util.BarterContainerLogger;
 import com.stifflered.bartercontainer.util.Components;
 import com.stifflered.bartercontainer.util.ItemUtil;
 import com.stifflered.bartercontainer.util.Sounds;
@@ -21,6 +23,8 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 
 public class BarterBuyGui extends ChestGui {
+
+    private static final BarterContainerLogger LOGGER = new BarterContainerLogger();
 
     private static final ItemStack BUY_ITEM = ItemUtil.wrapEdit(new ItemStack(Material.LIME_CANDLE), (meta) -> {
         Components.name(meta, Component.text("◎ Open Shop", TextColor.color(0, 255, 0)));
@@ -84,27 +88,7 @@ public class BarterBuyGui extends ChestGui {
                                 <gray>your purchase.""")
                     );
                     ItemUtil.glow(meta);
-                }), (event) -> {
-
-                    ItemStack itemStack = Objects.requireNonNullElse(store.getSaleStorage().getItem(buySlot.slot()), new ItemStack(Material.AIR)).clone();
-                    if (!previewItem.equals(itemStack)) {
-                        player.sendMessage(Components.prefixedError(Component.text("Looks like someone already took this item!")));
-                        player.closeInventory();
-                        return;
-                    }
-                    Sounds.purchase(player);
-                    if (me.sashak.inventoryutil.ItemUtil.hasAllItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice())) {
-                        HashMap<Integer, ItemStack> leftOver = store.getCurrencyStorage().addItem(store.getCurrentItemPrice());
-                        if (leftOver.isEmpty()) {
-                            ItemRemover.removeItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice());
-                            store.getSaleStorage().setItem(buySlot.slot, null);
-
-                            ItemUtil.giveItemOrThrow(player, itemStack);
-                        }
-                        new BarterBuyGui(player, store).show(event.getWhoClicked());
-                    }
-                }), 4, 1);
-
+                }), (event) -> this.buy((Player) event.getWhoClicked(), previewItem, buySlot, store)), 4, 1);
                 BarterBuyGui.this.update();
             })).toList());
         }
@@ -128,6 +112,30 @@ public class BarterBuyGui extends ChestGui {
 
         pane.addItem(new GuiItem(BUY_ITEM), 4, 1);
         this.canBuy = true;
+    }
+
+
+    private void buy(Player player, ItemStack previewItem, BuySlot buySlot, BarterStore store) {
+        ItemStack itemStack = Objects.requireNonNullElse(store.getSaleStorage().getItem(buySlot.slot()), new ItemStack(Material.AIR)).clone();
+        if (!previewItem.equals(itemStack)) {
+            player.sendMessage(Components.prefixedError(Component.text("Looks like someone already took this item!")));
+            player.closeInventory();
+            return;
+        }
+
+        Sounds.purchase(player);
+        if (me.sashak.inventoryutil.ItemUtil.hasAllItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice())) {
+            HashMap<Integer, ItemStack> leftOver = store.getCurrencyStorage().addItem(store.getCurrentItemPrice());
+            if (leftOver.isEmpty()) {
+                ItemRemover.removeItems(player, SlotGroups.PLAYER_ENTIRE_INV, store.getCurrentItemPrice());
+                store.getSaleStorage().setItem(buySlot.slot, null);
+
+                ItemUtil.giveItemOrThrow(player, itemStack);
+                LOGGER.logTransaction(player, itemStack, store);
+                BarterManager.INSTANCE.save(store.getLocation(), store);
+            }
+            new BarterBuyGui(player, store).show(player);
+        }
     }
 
     public static List<BuySlot> getBuyItems(BarterStore store) {
