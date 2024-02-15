@@ -63,10 +63,7 @@ public class SetPriceGuiItem extends GuiItem {
                 return;
             }
 
-            if (BarterManager.INSTANCE.lock(store.getKey(), player)) {
-                store.setCurrentItemPrice(itemStack);
-                BarterManager.INSTANCE.unlock(store.getKey());
-            }
+            store.setCurrentItemPrice(itemStack);
 
             Sounds.choose(editEvent.getWhoClicked());
             openEditMenu(store, player);

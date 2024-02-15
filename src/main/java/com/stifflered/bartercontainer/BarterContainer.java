@@ -1,6 +1,7 @@
 package com.stifflered.bartercontainer;
 
 import com.stifflered.bartercontainer.barter.BarterManager;
+import com.stifflered.bartercontainer.barter.ChunkBarterStorage;
 import com.stifflered.bartercontainer.command.BarterContainerCommand;
 import com.stifflered.bartercontainer.item.ItemInstances;
 import com.stifflered.bartercontainer.listeners.*;
@@ -14,6 +15,7 @@ public class BarterContainer extends JavaPlugin implements Listener {
     public static final String adminTreeName = "The TreeCrafter";
 
     public static JavaPlugin INSTANCE;
+    private final ChunkBarterStorage chunkBarterStorage = new ChunkBarterStorage(BarterManager.INSTANCE);
 
     @Override
     public void onEnable() {
@@ -27,7 +29,7 @@ public class BarterContainer extends JavaPlugin implements Listener {
                 new SafeFireworkDamageListener(),
                 new BarterBlockListener(),
                 new BarterInventoryListener(),
-                new ChunkUnloadListener()
+                new ChunkListener(chunkBarterStorage)
         );
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {

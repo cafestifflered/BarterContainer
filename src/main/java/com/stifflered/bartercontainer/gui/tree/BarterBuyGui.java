@@ -132,7 +132,7 @@ public class BarterBuyGui extends ChestGui {
 
                 ItemUtil.giveItemOrThrow(player, itemStack);
                 LOGGER.logTransaction(player, itemStack, store);
-                BarterManager.INSTANCE.save(store.getLocation(), store);
+                BarterManager.INSTANCE.save(store);
             }
             new BarterBuyGui(player, store).show(player);
         }

@@ -1,6 +1,7 @@
-package com.stifflered.bartercontainer.barter;
+package com.stifflered.bartercontainer.barter.serializers;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.stifflered.bartercontainer.barter.BarterStoreKeyImpl;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.store.BarterStoreImpl;
 import com.stifflered.bartercontainer.store.BarterStoreKey;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class BarterSerializer {
+public class LegacyBarterSerializer {
 
     private static final NamespacedKey BARTER_KEY = TagUtil.of("key");
 
@@ -55,13 +56,8 @@ public class BarterSerializer {
         return new BarterStoreImpl(new BarterStoreKeyImpl(uuid), playerProfile, itemStacks, currencyStorage, itemStack);
     }
 
-    // Quick
-    public boolean hasBarterStore(PersistentDataContainer persistentDataContainer) {
-        return persistentDataContainer.has(BARTER_KEY);
-    }
 
-
-    public List<ItemStack> getItems(PersistentDataContainer container, NamespacedKey namespacedKey) {
+    private List<ItemStack> getItems(PersistentDataContainer container, NamespacedKey namespacedKey) {
         List<ItemStack> itemStacks = new ArrayList<>();
         if (!container.has(namespacedKey)) {
             return itemStacks;
@@ -79,7 +75,7 @@ public class BarterSerializer {
     }
 
 
-    public void storeItems(PersistentDataContainer container, NamespacedKey namespacedKey, Inventory inventory) {
+    private void storeItems(PersistentDataContainer container, NamespacedKey namespacedKey, Inventory inventory) {
         List<String> strings = new ArrayList<>();
         for (ItemStack itemStack : inventory.getContents()) {
             if (itemStack != null) {
@@ -90,14 +86,5 @@ public class BarterSerializer {
         }
 
         container.set(namespacedKey, PersistentDataType.STRING, String.join(";", strings));
-    }
-
-
-    public record BarterStoreKeyImpl(UUID uuid) implements BarterStoreKey {
-
-        @Override
-        public UUID key() {
-            return this.uuid;
-        }
     }
 }

@@ -1,108 +1,105 @@
 package com.stifflered.bartercontainer.barter;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import com.stifflered.bartercontainer.BarterContainer;
+import com.stifflered.bartercontainer.barter.serializers.InGameBarterSerializer;
+import com.stifflered.bartercontainer.event.CreateBarterContainer;
+import com.stifflered.bartercontainer.event.RemoveBarterContainer;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.store.BarterStoreImpl;
 import com.stifflered.bartercontainer.store.BarterStoreKey;
+import com.stifflered.bartercontainer.util.source.Sources;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
-import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BarterManager {
 
     public static final BarterManager INSTANCE = new BarterManager();
 
-    private final BarterSerializer serializer = new BarterSerializer();
+    private final InGameBarterSerializer serializer = new InGameBarterSerializer();
 
-    private final BiMap<BarterStoreKey, Player> locks = HashBiMap.create();
-    private final Map<Location, BarterStore> barterStoreMap = new HashMap<>();
-    private final Map<Chunk, Set<BarterStore>> chunkMap = new HashMap<>();
+    private final Map<BarterStoreKey, BarterStore> storage = new ConcurrentHashMap<>();
 
-    @Nullable
-    public BarterStore getBarter(Location location) {
-        BarterStore barterStore = this.barterStoreMap.get(location);
-        if (barterStore == null) {
-            barterStore = this.newBarterAtLocation(location);
-        }
-
-        if (barterStore != null) {
-            this.barterStoreMap.put(location, barterStore);
-            this.chunkMap.computeIfAbsent(location.getChunk(), (v) -> new HashSet<>()).add(barterStore);
-        }
-
-        return barterStore;
+    public void createNewStore(BarterStoreImpl barterStore, PersistentDataContainer persistentDataContainer, Chunk chunk) {
+        this.serializer.writeBarterStoreKey(persistentDataContainer, barterStore);
+        this.storage.put(barterStore.getKey(), barterStore);
+        new CreateBarterContainer(barterStore, chunk).callEvent();
     }
 
-    @Nullable
-    private BarterStore newBarterAtLocation(Location location) {
-        if (location.getBlock().getState(false) instanceof TileState tileState) {
-            PersistentDataContainer container = tileState.getPersistentDataContainer();
-            if (this.serializer.hasBarterStore(container)) {
-                BarterStore store = this.serializer.getBarterStore(container);
-                ((BarterStoreImpl) store).setLocation(location.clone());
-                return store;
-            }
-        }
+    public boolean removeBarterContainer(Location location) {
+        Optional<BarterStore> value = this.keyAtLocation(location)
+                .map(storage::remove);
 
-        return null;
-    }
-
-    public boolean lock(BarterStoreKey key, Player player) {
-        if (this.locks.containsKey(key)) {
-            return false;
-        }
-
-        this.locks.put(key, player);
-        return true;
-    }
-
-
-    public boolean unlock(BarterStoreKey key) {
-        if (this.locks.containsKey(key)) {
-            this.locks.remove(key);
+        if (value.isPresent()) {
+            new RemoveBarterContainer(value.get(), location.getChunk()).callEvent();
             return true;
         }
 
         return false;
     }
 
-    public void unload(Chunk chunk) {
-        Set<BarterStore> stores = this.chunkMap.remove(chunk);
-        if (stores == null) {
-            return;
-        }
-
-        for (BarterStore store : stores) {
-            Location remove = store.getLocation();
-            this.save(remove, this.barterStoreMap.remove(remove));
-        }
+    public void loadAndCacheContainer(BarterStoreKey barterStoreKey) throws Exception {
+        BarterStore store = Sources.BARTER_STORAGE.load(barterStoreKey);
+        this.storage.put(barterStoreKey, store);
     }
 
-    public void save(Location location, BarterStore barterStore) {
-        BlockState state = location.getBlock().getState(false);
-        if (state instanceof TileState tileState) {
-            BarterManager.INSTANCE.getSerializer().saveBarterStore(barterStore, tileState.getPersistentDataContainer());
+    public void saveContainersAndUnload(List<UUID> uuids) {
+        new BukkitRunnable(){
+
+            @Override
+            public void run() {
+                for (UUID uuid : uuids) {
+                    BarterStore store = storage.remove(new BarterStoreKeyImpl(uuid));
+                    try {
+                        Sources.BARTER_STORAGE.save(store);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.runTaskAsynchronously(BarterContainer.INSTANCE);
+    }
+
+    public void expungeContainer(UUID uuid) {
+        this.storage.remove(new BarterStoreKeyImpl(uuid));
+    }
+
+    public Optional<BarterStore> getBarter(Location location) {
+        return this.keyAtLocation(location)
+                .map(this.storage::get);
+    }
+
+    private Optional<BarterStoreKey> keyAtLocation(Location location) {
+        if (location.getBlock().getState(false) instanceof TileState tileState) {
+            PersistentDataContainer container = tileState.getPersistentDataContainer();
+
+            return this.serializer.getBarterStoreKey(container);
         }
-    }
 
-    public BarterSerializer getSerializer() {
-        return serializer;
-    }
-
-    public void removeBarter(Location location) {
-        this.barterStoreMap.remove(location);
+        return Optional.empty();
     }
 
     public void saveAll() {
-        for (Map.Entry<Location, BarterStore> entry : this.barterStoreMap.entrySet()) {
-            this.save(entry.getKey(), entry.getValue());
+        storage.values().forEach(barterStore -> {
+            try {
+                Sources.BARTER_STORAGE.save(barterStore);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void save(BarterStore store) {
+        try {
+            Sources.BARTER_STORAGE.save(store);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
 }

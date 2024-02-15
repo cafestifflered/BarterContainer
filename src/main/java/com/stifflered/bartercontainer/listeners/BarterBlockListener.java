@@ -2,6 +2,8 @@ package com.stifflered.bartercontainer.listeners;
 
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.barter.permission.BarterRole;
+import com.stifflered.bartercontainer.barter.serializers.LegacyBarterSerializer;
+import com.stifflered.bartercontainer.event.RemoveBarterContainer;
 import com.stifflered.bartercontainer.gui.tree.BarterBuyGui;
 import com.stifflered.bartercontainer.gui.tree.BarterGui;
 import com.stifflered.bartercontainer.item.ItemInstances;
@@ -11,6 +13,7 @@ import com.stifflered.bartercontainer.util.Sounds;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
+import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -24,46 +27,49 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class BarterBlockListener implements Listener {
 
+    private static final LegacyBarterSerializer legacy = new LegacyBarterSerializer();
+
     @EventHandler
     public void protect(BlockBreakEvent event) {
         Location location = event.getBlock().getLocation();
-        BarterStore barterStore = BarterManager.INSTANCE.getBarter(location);
-        if (barterStore != null) {
-            event.setCancelled(!barterStore.canBreak(event.getPlayer()));
-            if (!event.isCancelled()) {
-                BarterManager.INSTANCE.removeBarter(location);
-                ItemUtil.giveItemOrThrow(event.getPlayer(), ItemInstances.SHOP_LISTER_ITEM.getItem());
-            }
-        }
+        BarterManager.INSTANCE.getBarter(location)
+                .ifPresent((container) -> {
+                    event.setCancelled(!container.canBreak(event.getPlayer()));
+                    if (!event.isCancelled()) {
+                        BarterManager.INSTANCE.removeBarterContainer(location);
+                        ItemUtil.giveItemOrThrow(event.getPlayer(), ItemInstances.SHOP_LISTER_ITEM.getItem());
+                    }
+                });
     }
 
     @EventHandler
     public void drop(BlockExplodeEvent event) {
-        event.blockList().removeIf((block) -> { return BarterManager.INSTANCE.getBarter(block.getLocation()) != null;});
+        event.blockList().removeIf((block) -> BarterManager.INSTANCE.getBarter(block.getLocation()).isPresent());
     }
 
     @EventHandler
     public void drop(EntityExplodeEvent event) {
-        event.blockList().removeIf((block) -> { return BarterManager.INSTANCE.getBarter(block.getLocation()) != null;});
+        event.blockList().removeIf((block) -> BarterManager.INSTANCE.getBarter(block.getLocation()).isPresent());
     }
 
     @EventHandler
     public void change(InventoryMoveItemEvent event) {
         if (event.getDestination().getHolder(false) instanceof Hopper hopper) {
-            BarterStore barterStore = BarterManager.INSTANCE.getBarter(hopper.getLocation());
-            if (barterStore != null) {
-                event.setCancelled(true);
-            }
+            BarterManager.INSTANCE.getBarter(hopper.getLocation())
+                    .ifPresent((container) -> {
+                        event.setCancelled(true);
+                    });
         }
 
         if (event.getSource().getHolder(false) instanceof Hopper hopper) {
-            BarterStore barterStore = BarterManager.INSTANCE.getBarter(hopper.getLocation());
-            if (barterStore != null) {
-                event.setCancelled(true);
-            }
+            BarterManager.INSTANCE.getBarter(hopper.getLocation())
+                    .ifPresent((container) -> {
+                        event.setCancelled(true);
+                    });
         }
     }
-//
+
+
 //    @EventHandler
 //    public void fade(BlockFadeEvent event) {
 //        ImportantBlock importantBlock = this.fromLocation(event.getBlock().getLocation());
@@ -128,21 +134,25 @@ public class BarterBlockListener implements Listener {
             return;
         }
 
-        BarterStore barterStore = BarterManager.INSTANCE.getBarter(block.getLocation());
-        if (barterStore != null) {
-            Sounds.openChest(player);
-            if (barterStore.getRole(player) == BarterRole.UPKEEPER || player.hasPermission("barterchests.edit_all")) {
-                if (player.isSneaking()) {
-                    new BarterBuyGui(player, barterStore).show(player);
-                } else {
-                    new BarterGui(barterStore).show(player);
-                }
-                event.setUseInteractedBlock(Event.Result.DENY);
-            } else {
-                new BarterBuyGui(player, barterStore).show(player);
-                event.setUseInteractedBlock(Event.Result.DENY);
-            }
+        if (block.getState(false) instanceof TileState state) {
+            BarterStore store = legacy.getBarterStore(state.getPersistentDataContainer());;
         }
+
+        BarterManager.INSTANCE.getBarter(block.getLocation())
+                .ifPresent((barterStore) -> {
+                    Sounds.openChest(player);
+                    if (barterStore.getRole(player) == BarterRole.UPKEEPER || player.hasPermission("barterchests.edit_all")) {
+                        if (player.isSneaking()) {
+                            new BarterBuyGui(player, barterStore).show(player);
+                        } else {
+                            new BarterGui(barterStore).show(player);
+                        }
+                        event.setUseInteractedBlock(Event.Result.DENY);
+                    } else {
+                        new BarterBuyGui(player, barterStore).show(player);
+                        event.setUseInteractedBlock(Event.Result.DENY);
+                    }
+                });
     }
 
 

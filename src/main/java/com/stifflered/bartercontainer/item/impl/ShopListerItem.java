@@ -1,7 +1,7 @@
 package com.stifflered.bartercontainer.item.impl;
 
 import com.stifflered.bartercontainer.barter.BarterManager;
-import com.stifflered.bartercontainer.barter.BarterSerializer;
+import com.stifflered.bartercontainer.barter.BarterStoreKeyImpl;
 import com.stifflered.bartercontainer.item.ItemInstance;
 import com.stifflered.bartercontainer.store.BarterStoreImpl;
 import com.stifflered.bartercontainer.util.Components;
@@ -66,15 +66,17 @@ public class ShopListerItem extends ItemInstance {
                 player.sendMessage(Components.prefixedError(Component.text("You can only convert empty containers!")));
                 return;
             }
-            if (BarterManager.INSTANCE.getBarter(tileState.getLocation()) != null) {
+            if (BarterManager.INSTANCE.getBarter(tileState.getLocation()).isPresent()) {
                 player.sendMessage(Components.prefixedError(Component.text("There is already a barter container at this location.")));
                 return;
             }
 
-            BarterManager.INSTANCE.getSerializer().saveBarterStore(
-                    new BarterStoreImpl(new BarterSerializer.BarterStoreKeyImpl(UUID.randomUUID()), player.getPlayerProfile(), new ArrayList<>(), new ArrayList<>(), new ItemStack(Material.DIAMOND)),
-                    tileState.getPersistentDataContainer()
+            BarterManager.INSTANCE.createNewStore(
+                    new BarterStoreImpl(new BarterStoreKeyImpl(UUID.randomUUID()), player.getPlayerProfile(), new ArrayList<>(), new ArrayList<>(), new ItemStack(Material.DIAMOND)),
+                    tileState.getPersistentDataContainer(),
+                    state.getChunk()
             );
+
 
             ItemUtil.subtract(event.getPlayer(), event.getItem());
             event.setUseInteractedBlock(Event.Result.DENY);
