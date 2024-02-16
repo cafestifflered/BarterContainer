@@ -43,17 +43,21 @@ public class LegacyBarterSerializer {
 
     @Nullable
     public BarterStore getBarterStore(PersistentDataContainer container) {
-        UUID uuid = UUID.fromString(container.get(BARTER_KEY, PersistentDataType.STRING));
-        PlayerProfile playerProfile = Bukkit.createProfile(
-                UUID.fromString(container.get(NAME_UUID, PersistentDataType.STRING)),
-                container.get(NAME_PLAYER, PersistentDataType.STRING)
-        );
+        try {
+            UUID uuid = UUID.fromString(container.get(BARTER_KEY, PersistentDataType.STRING));
+            PlayerProfile playerProfile = Bukkit.createProfile(
+                    UUID.fromString(container.get(NAME_UUID, PersistentDataType.STRING)),
+                    container.get(NAME_PLAYER, PersistentDataType.STRING)
+            );
 
-        List<ItemStack> itemStacks = this.getItems(container, SHOP_ITEMS);
-        List<ItemStack> currencyStorage = this.getItems(container, CURRENCY_STORAGE);
-        ItemStack itemStack = ItemStack.deserializeBytes(Base64.getDecoder().decode(container.get(PRICE_ITEM, PersistentDataType.STRING)));
+            List<ItemStack> itemStacks = this.getItems(container, SHOP_ITEMS);
+            List<ItemStack> currencyStorage = this.getItems(container, CURRENCY_STORAGE);
+            ItemStack itemStack = ItemStack.deserializeBytes(Base64.getDecoder().decode(container.get(PRICE_ITEM, PersistentDataType.STRING)));
 
-        return new BarterStoreImpl(new BarterStoreKeyImpl(uuid), playerProfile, itemStacks, currencyStorage, itemStack);
+            return new BarterStoreImpl(new BarterStoreKeyImpl(uuid), playerProfile, itemStacks, currencyStorage, itemStack);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 

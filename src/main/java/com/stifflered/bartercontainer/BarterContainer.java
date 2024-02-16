@@ -15,11 +15,12 @@ public class BarterContainer extends JavaPlugin implements Listener {
     public static final String adminTreeName = "The TreeCrafter";
 
     public static JavaPlugin INSTANCE;
-    private final ChunkBarterStorage chunkBarterStorage = new ChunkBarterStorage(BarterManager.INSTANCE);
+    private ChunkBarterStorage chunkBarterStorage;
 
     @Override
     public void onEnable() {
         INSTANCE = this;
+        chunkBarterStorage = new ChunkBarterStorage(BarterManager.INSTANCE);
         ItemInstances.SHOP_LISTER_ITEM.getItem(); // Load ITEM_INSTANCES
         Bukkit.getCommandMap().register("barterbarrels", new BarterContainerCommand());
 

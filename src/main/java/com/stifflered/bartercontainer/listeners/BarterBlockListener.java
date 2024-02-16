@@ -1,16 +1,20 @@
 package com.stifflered.bartercontainer.listeners;
 
 import com.stifflered.bartercontainer.barter.BarterManager;
+import com.stifflered.bartercontainer.barter.permission.BarterPermission;
 import com.stifflered.bartercontainer.barter.permission.BarterRole;
 import com.stifflered.bartercontainer.barter.serializers.LegacyBarterSerializer;
 import com.stifflered.bartercontainer.event.RemoveBarterContainer;
 import com.stifflered.bartercontainer.gui.tree.BarterBuyGui;
 import com.stifflered.bartercontainer.gui.tree.BarterGui;
+import com.stifflered.bartercontainer.item.ItemInstance;
 import com.stifflered.bartercontainer.item.ItemInstances;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.util.ItemUtil;
 import com.stifflered.bartercontainer.util.Sounds;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.block.TileState;
@@ -24,6 +28,7 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class BarterBlockListener implements Listener {
 
@@ -135,7 +140,25 @@ public class BarterBlockListener implements Listener {
         }
 
         if (block.getState(false) instanceof TileState state) {
-            BarterStore store = legacy.getBarterStore(state.getPersistentDataContainer());;
+            BarterStore store = legacy.getBarterStore(state.getPersistentDataContainer());
+            if (store != null && store.getRole(player).hasPermission(BarterPermission.DELETE)) {
+                block.setType(Material.AIR);
+                event.getPlayer().sendMessage(Component.text("Barrels have been redone to help with item loss! Please recreate your barrel."));
+                event.getPlayer().sendMessage(Component.text("NOTE: YOUR ITEMS WILL BE DROPPED ON THE FLOOR... CLICK AGAIN TO CONFIRM"));
+                event.getPlayer().getInventory().addItem(ItemInstances.SHOP_LISTER_ITEM.getItem());
+                for (ItemStack item : store.getSaleStorage()) {
+                    if (item != null) {
+                        block.getWorld().dropItemNaturally(block.getLocation(), item);
+                    }
+
+                }
+
+                for (ItemStack item : store.getCurrencyStorage()) {
+                    if (item != null) {
+                        block.getWorld().dropItemNaturally(block.getLocation(), item);
+                    }
+                }
+            }
         }
 
         BarterManager.INSTANCE.getBarter(block.getLocation())

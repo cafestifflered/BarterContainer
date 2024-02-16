@@ -58,8 +58,12 @@ public class ChunkBarterStorage {
             @Override
             public void run() {
                 for (UUID uuid : entries) {
+                    if (!chunk.isLoaded()) {
+                        break;
+                    }
+
                     try {
-                        barterManager.loadAndCacheContainer(new BarterStoreKeyImpl(uuid));
+                        barterManager.loadAndCacheContainer(new BarterStoreKeyImpl(uuid), (store) -> chunk.isLoaded()); // make sure chunk is loaded
                     } catch (Exception e) {
                         System.out.println("Failed to load barter container!");
                         e.printStackTrace();
@@ -81,7 +85,7 @@ public class ChunkBarterStorage {
     @Nullable
     private static List<UUID> read(Chunk chunk) {
         String values = chunk.getPersistentDataContainer().get(BARTER_KEYS, PersistentDataType.STRING);
-        if (values == null) {
+        if (values == null || values.isBlank()) {
             return null;
         }
 

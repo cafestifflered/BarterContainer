@@ -16,6 +16,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 public class BarterManager {
 
@@ -37,32 +38,47 @@ public class BarterManager {
 
         if (value.isPresent()) {
             new RemoveBarterContainer(value.get(), location.getChunk()).callEvent();
+                new BukkitRunnable(){
+
+                    @Override
+                    public void run() {
+                        try {
+                            Sources.BARTER_STORAGE.delete(value.get());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }.runTaskAsynchronously(BarterContainer.INSTANCE);
+
             return true;
         }
 
         return false;
     }
 
-    public void loadAndCacheContainer(BarterStoreKey barterStoreKey) throws Exception {
+    public void loadAndCacheContainer(BarterStoreKey barterStoreKey, Predicate<BarterStore> conditionCheck) throws Exception {
         BarterStore store = Sources.BARTER_STORAGE.load(barterStoreKey);
-        this.storage.put(barterStoreKey, store);
+        if (conditionCheck.test(store)) {
+            this.storage.put(barterStoreKey, store);
+        }
     }
 
     public void saveContainersAndUnload(List<UUID> uuids) {
-        new BukkitRunnable(){
+        for (UUID uuid : uuids) {
+            BarterStore store = storage.remove(new BarterStoreKeyImpl(uuid));
+            if (store != null) {
+                new BukkitRunnable(){
 
-            @Override
-            public void run() {
-                for (UUID uuid : uuids) {
-                    BarterStore store = storage.remove(new BarterStoreKeyImpl(uuid));
-                    try {
-                        Sources.BARTER_STORAGE.save(store);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    @Override
+                    public void run() {
+                        try {
+                            Sources.BARTER_STORAGE.save(store);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
+                }.runTaskAsynchronously(BarterContainer.INSTANCE);
             }
-        }.runTaskAsynchronously(BarterContainer.INSTANCE);
+        }
     }
 
     public void expungeContainer(UUID uuid) {

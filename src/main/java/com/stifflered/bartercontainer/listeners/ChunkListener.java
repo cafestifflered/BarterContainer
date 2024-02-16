@@ -2,6 +2,8 @@ package com.stifflered.bartercontainer.listeners;
 
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.barter.ChunkBarterStorage;
+import com.stifflered.bartercontainer.event.CreateBarterContainer;
+import com.stifflered.bartercontainer.event.RemoveBarterContainer;
 import org.bukkit.Chunk;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,6 +16,16 @@ public class ChunkListener implements Listener {
 
     public ChunkListener(ChunkBarterStorage chunkBarterStorage) {
         this.chunkBarterStorage = chunkBarterStorage;
+    }
+
+    @EventHandler
+    public void onAdd(CreateBarterContainer event) {
+        this.chunkBarterStorage.handleAdd(event.getChunk(), event.getContainer());
+    }
+
+    @EventHandler
+    public void onRemove(RemoveBarterContainer event) {
+        this.chunkBarterStorage.handleRemove(event.getChunk(), event.getContainer());
     }
 
     @EventHandler
