@@ -33,10 +33,6 @@ public class BarterContainer extends JavaPlugin implements Listener {
                 new ChunkListener(chunkBarterStorage)
         );
 
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            new PlaceholderAPIHook();
-        }
-
 
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
             //worldGuardHook = new WorldGuardHook();
