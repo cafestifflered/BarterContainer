@@ -57,6 +57,9 @@ public class BarterManager {
 
     public void loadAndCacheContainer(BarterStoreKey barterStoreKey, Predicate<BarterStore> conditionCheck) throws Exception {
         BarterStore store = Sources.BARTER_STORAGE.load(barterStoreKey);
+        if (store == null) {
+            throw new IllegalStateException("Tried to load storage that doesnt exist!");
+        }
         if (conditionCheck.test(store)) {
             this.storage.put(barterStoreKey, store);
         }

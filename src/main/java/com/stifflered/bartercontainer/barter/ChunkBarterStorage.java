@@ -65,8 +65,8 @@ public class ChunkBarterStorage {
                     try {
                         barterManager.loadAndCacheContainer(new BarterStoreKeyImpl(uuid), (store) -> chunk.isLoaded()); // make sure chunk is loaded
                     } catch (Exception e) {
-                        System.out.println("Failed to load barter container!");
-                        e.printStackTrace();
+                        BarterContainer.INSTANCE.getLogger().warning(e.getMessage());
+                        BarterContainer.INSTANCE.getLogger().warning("Failed to load BarterContainer: " + uuid);
                     }
                 }
             }
