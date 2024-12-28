@@ -21,8 +21,8 @@ dependencies {
         include("**/*.jar")
     })
 
-    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.13")
-    compileOnly("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
+    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.19")
+    compileOnly("io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT")
 }
 
 bukkit {
@@ -36,7 +36,7 @@ bukkit {
 tasks {
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(17)
+        options.release.set(21)
     }
 
     shadowJar {
@@ -47,11 +47,11 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.20.4")
+        minecraftVersion("1.21.4")
     }
 
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }

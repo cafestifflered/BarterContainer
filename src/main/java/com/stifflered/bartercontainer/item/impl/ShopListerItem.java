@@ -1,5 +1,7 @@
 package com.stifflered.bartercontainer.item.impl;
 
+import com.stifflered.bartercontainer.BarterContainer;
+import com.stifflered.bartercontainer.BarterContainerConfiguration;
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.barter.BarterStoreKeyImpl;
 import com.stifflered.bartercontainer.item.ItemInstance;
@@ -30,12 +32,11 @@ public class ShopListerItem extends ItemInstance {
 
     public ShopListerItem() {
         super("shop_lister",
-                ItemUtil.wrapEdit(new ItemStack(Material.NAME_TAG), (meta) -> {
-                    Components.name(meta, Component.text("Shop Lister"));
-                    Components.lore(meta, Components.miniSplit("""
-                            <white>Click me on a container to
-                            activate your bartering container!
-                            """));
+                ItemUtil.wrapEdit(ItemStack.of(BarterContainer.INSTANCE.getConfiguration().getShopListerConfiguration().material()), (meta) -> {
+                    BarterContainerConfiguration.ShopListerConfig config =  BarterContainer.INSTANCE.getConfiguration().getShopListerConfiguration();
+
+                    Components.name(meta, config.name());
+                    Components.lore(meta, config.lore());
                 })
         );
     }

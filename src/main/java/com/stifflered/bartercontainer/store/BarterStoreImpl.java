@@ -1,11 +1,14 @@
 package com.stifflered.bartercontainer.store;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.stifflered.bartercontainer.BarterContainer;
 import com.stifflered.bartercontainer.barter.permission.BarterPermission;
 import com.stifflered.bartercontainer.barter.permission.BarterRole;
 import com.stifflered.bartercontainer.store.owners.BankOwner;
 import com.stifflered.bartercontainer.util.Components;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -73,7 +76,10 @@ public class BarterStoreImpl implements BarterStore {
 
     @Override
     public Component getNameStyled() {
-        return Component.text(this.playerProfile.getName() + "'s Barter Container");
+        return MiniMessage.miniMessage().deserialize(
+                BarterContainer.INSTANCE.getConfiguration().getStyledBarterTitle(),
+                Placeholder.parsed("player", this.playerProfile.getName())
+        );
     }
 
     @Override

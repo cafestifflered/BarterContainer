@@ -14,14 +14,14 @@ public class BarterContainer extends JavaPlugin implements Listener {
 
     public static final String adminTreeName = "The TreeCrafter";
 
-    public static JavaPlugin INSTANCE;
+    public static BarterContainer INSTANCE;
     private ChunkBarterStorage chunkBarterStorage;
+    private BarterContainerConfiguration configuration;
 
     @Override
     public void onEnable() {
         INSTANCE = this;
         chunkBarterStorage = new ChunkBarterStorage(BarterManager.INSTANCE);
-        ItemInstances.SHOP_LISTER_ITEM.getItem(); // Load ITEM_INSTANCES
         Bukkit.getCommandMap().register("barterbarrels", new BarterContainerCommand());
 
         this.register(
@@ -38,6 +38,8 @@ public class BarterContainer extends JavaPlugin implements Listener {
             //worldGuardHook = new WorldGuardHook();
             //log("Hooked into World Guard");
         }
+        this.configuration = new BarterContainerConfiguration(this);
+        ItemInstances.SHOP_LISTER_ITEM.getItem(); // Load ITEM_INSTANCES
     }
 
 //    @EventHandler
@@ -71,4 +73,7 @@ public class BarterContainer extends JavaPlugin implements Listener {
         }
     }
 
+    public BarterContainerConfiguration getConfiguration() {
+        return configuration;
+    }
 }

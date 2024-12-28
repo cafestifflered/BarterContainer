@@ -1,0 +1,5 @@
+styled-title: <player>'s Barter Container
+shop-lister-item:
+  type: minecraft:name_tag
+  name: 'Shop Lister'
+  lore: ['<!italic><white>Click me on a container to', '<!italic><white>activate your bartering container!']

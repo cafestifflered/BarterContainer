@@ -11,7 +11,7 @@ public class Particles {
         World world = location.getWorld();
         Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(r, g, b), 1);
 
-        world.spawnParticle(Particle.REDSTONE, location, 1, dustOptions);
+        world.spawnParticle(Particle.DUST, location, 1, dustOptions);
     }
 
     public static void spawnParticle(Location center, Particle particle) {
