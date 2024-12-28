@@ -24,7 +24,6 @@ public class BarterStoreImpl implements BarterStore {
     private Inventory itemStacks;
     private Inventory currencyHolder;
     private ItemStack itemStack;
-    private Location location;
 
     public BarterStoreImpl(BarterStoreKey barterStoreKey, PlayerProfile playerProfile, List<ItemStack> itemStacks, List<ItemStack> currencyItems, ItemStack itemStack) {
         this.barterStoreKey = barterStoreKey;
@@ -105,12 +104,4 @@ public class BarterStoreImpl implements BarterStore {
         return BarterRole.VISITOR;
     }
 
-    @Override
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
 }

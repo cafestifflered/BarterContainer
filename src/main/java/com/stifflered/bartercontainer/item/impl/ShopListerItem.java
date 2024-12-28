@@ -31,14 +31,7 @@ public class ShopListerItem extends ItemInstance {
     private static final Sound ACTIVATED_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BEACON_ACTIVATE, Sound.Source.BLOCK, 1, 1);
 
     public ShopListerItem() {
-        super("shop_lister",
-                ItemUtil.wrapEdit(ItemStack.of(BarterContainer.INSTANCE.getConfiguration().getShopListerConfiguration().material()), (meta) -> {
-                    BarterContainerConfiguration.ShopListerConfig config =  BarterContainer.INSTANCE.getConfiguration().getShopListerConfiguration();
-
-                    Components.name(meta, config.name());
-                    Components.lore(meta, config.lore());
-                })
-        );
+        super("shop_lister", BarterContainer.INSTANCE.getConfiguration().getShopListerConfiguration());
     }
 
     @Override

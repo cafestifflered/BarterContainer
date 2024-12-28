@@ -4,6 +4,7 @@ import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHold
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.stifflered.bartercontainer.BarterContainer;
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.gui.tree.buttons.SetPriceGuiItem;
 import com.stifflered.bartercontainer.store.BarterStore;
@@ -16,6 +17,9 @@ import me.sashak.inventoryutil.slotgroup.SlotGroups;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -26,34 +30,21 @@ public class BarterBuyGui extends ChestGui {
 
     private static final BarterContainerLogger LOGGER = new BarterContainerLogger();
 
-    private static final ItemStack BUY_ITEM = ItemUtil.wrapEdit(new ItemStack(Material.LIME_CANDLE), (meta) -> {
-        Components.name(meta, Component.text("◎ Open Shop", TextColor.color(0, 255, 0)));
-        Components.lore(meta, Components.miniSplit("""
-                    <gray>Click an item to <green>buy</green>.""")
-        );
-    });
+    private static final ItemStack BUY_ITEM = BarterContainer.INSTANCE
+            .getConfiguration()
+            .getBuyItemConfiguration();
 
-    private static final ItemStack OUT_OF_STOCK = ItemUtil.wrapEdit(new ItemStack(Material.RED_CANDLE), (meta) -> {
-        Components.name(meta, Component.text("◎ Out of Stock", TextColor.color(255, 0, 0)));
-        Components.lore(meta, Components.miniSplit("""
-                    <gray>This shop is <red>out</red> of stock!""")
-        );
-    });
+    private static final ItemStack OUT_OF_STOCK = BarterContainer.INSTANCE
+            .getConfiguration()
+            .getOutOfStockItemConfiguration();
 
-    private static final ItemStack SHOP_FULL = ItemUtil.wrapEdit(new ItemStack(Material.RED_CANDLE), (meta) -> {
-        Components.name(meta, Component.text("◎ Full Shop", TextColor.color(255, 0, 0)));
-        Components.lore(meta, Components.miniSplit("""
-                    <gray>This shop's bank is <red>full</red>!""")
-        );
-    });
+    private static final ItemStack SHOP_FULL = BarterContainer.INSTANCE
+            .getConfiguration()
+            .getShopFullItemConfiguration();
 
-    private static final ItemStack NOT_ENOUGH_PRICE = ItemUtil.wrapEdit(new ItemStack(Material.RED_CANDLE), (meta) -> {
-        Components.name(meta, Component.text("◎ Can't afford!", TextColor.color(255, 0, 0)));
-        Components.lore(meta, Components.miniSplit("""
-                    <gray>You do not have the required
-                    <gray><red>items</red> for this store!""")
-        );
-    });
+    private static final ItemStack NOT_ENOUGH_PRICE = BarterContainer.INSTANCE
+            .getConfiguration()
+            .getNotEnoughPriceItemConfiguration();
 
     private boolean canBuy = false;
 
@@ -132,6 +123,14 @@ public class BarterBuyGui extends ChestGui {
 
                 ItemUtil.giveItemOrThrow(player, itemStack);
                 LOGGER.logTransaction(player, itemStack, store);
+                Player owner = Bukkit.getPlayer(store.getPlayerProfile().getId());
+                if (owner != null) {
+                    owner.sendRichMessage(BarterContainer.INSTANCE.getConfiguration().getPurchaseFromPlayerMessage(),
+                            Placeholder.parsed("count", String.valueOf(itemStack.getAmount())),
+                            Placeholder.parsed("type", itemStack.getType().toString()),
+                            Placeholder.parsed("purchaser", player.getName())
+                    );
+                }
                 BarterManager.INSTANCE.save(store);
             }
             new BarterBuyGui(player, store).show(player);

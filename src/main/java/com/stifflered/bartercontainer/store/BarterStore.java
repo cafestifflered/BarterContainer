@@ -35,6 +35,4 @@ public interface BarterStore {
 
     BarterRole getRole(Player player);
 
-    Location getLocation();
-
 }

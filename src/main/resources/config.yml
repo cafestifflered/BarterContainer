@@ -3,3 +3,28 @@ shop-lister-item:
   type: minecraft:name_tag
   name: 'Shop Lister'
   lore: ['<!italic><white>Click me on a container to', '<!italic><white>activate your bartering container!']
+purchase-from-player-message: '<green> <purchaser> has bought <count> x <type> from your Shop!'
+buy-item:
+  type: "minecraft:lime_candle"
+  name: "<green>◎ Open Shop"
+  lore:
+    - "<gray>Click an item to <green>buy</green>."
+
+out-of-stock-item:
+  type: "minecraft:red_candle"
+  name: "<red>◎ Out of Stock"
+  lore:
+    - "<gray>This shop is <red>out</red> of stock!"
+
+shop-full-item:
+  type: "minecraft:red_candle"
+  name: "<red>◎ Full Shop"
+  lore:
+    - "<gray>This shop's bank is <red>full</red>!"
+
+not-enough-price-item:
+  type: "minecraft:red_candle"
+  name: "<red>◎ Can't afford!"
+  lore:
+    - "<gray>You do not have the required"
+    - "<gray><red>items</red> for this store!"

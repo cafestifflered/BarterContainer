@@ -37,7 +37,7 @@ public class BarterContainerLogger {
 
 
     public void logTransaction(Player player, ItemStack bought, BarterStore store) {
-        String log = "%s bought one %s from %s".formatted(player.getName(), bought, store.getLocation());
+        String log = "%s bought one %s from %s".formatted(player.getName(), bought, store.getKey());
         LOGGER.info(log);
         this.logToFile(log);
     }
