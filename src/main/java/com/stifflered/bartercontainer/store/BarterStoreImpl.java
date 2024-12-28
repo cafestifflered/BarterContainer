@@ -5,6 +5,7 @@ import com.stifflered.bartercontainer.BarterContainer;
 import com.stifflered.bartercontainer.barter.permission.BarterPermission;
 import com.stifflered.bartercontainer.barter.permission.BarterRole;
 import com.stifflered.bartercontainer.store.owners.BankOwner;
+import com.stifflered.bartercontainer.store.owners.SaveOnClose;
 import com.stifflered.bartercontainer.util.Components;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -28,7 +29,7 @@ public class BarterStoreImpl implements BarterStore {
     public BarterStoreImpl(BarterStoreKey barterStoreKey, PlayerProfile playerProfile, List<ItemStack> itemStacks, List<ItemStack> currencyItems, ItemStack itemStack) {
         this.barterStoreKey = barterStoreKey;
         this.playerProfile = playerProfile;
-        this.itemStacks = Bukkit.createInventory(null, 27);
+        this.itemStacks = Bukkit.createInventory(new SaveOnClose(this, () -> this.itemStacks), 27);
         this.itemStacks.setContents(itemStacks.toArray(new ItemStack[0]));
         this.currencyHolder = Bukkit.createInventory(new BankOwner(this), 27);
         this.currencyHolder.setContents(currencyItems.toArray(new ItemStack[0]));

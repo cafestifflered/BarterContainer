@@ -3,6 +3,7 @@ package com.stifflered.bartercontainer.gui.tree;
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.gui.tree.buttons.SetPriceGuiItem;
 import com.stifflered.bartercontainer.gui.tree.buttons.ViewContentsGuiItem;
 import com.stifflered.bartercontainer.gui.tree.buttons.ViewCurrencyGuiItem;
@@ -26,6 +27,9 @@ public class BarterGui extends ChestGui {
 
         pane.addItem(new ViewCurrencyGuiItem(barterStore), 6, 1);
         pane.addItem(new ViewLogsGuiItem(barterStore), 8, 0);
+        this.setOnClose((event) -> {
+            BarterManager.INSTANCE.save(barterStore);
+        });
     }
     
 }

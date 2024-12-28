@@ -15,6 +15,7 @@ import com.stifflered.bartercontainer.util.Sounds;
 import me.sashak.inventoryutil.ItemRemover;
 import me.sashak.inventoryutil.slotgroup.SlotGroups;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -131,6 +132,17 @@ public class BarterBuyGui extends ChestGui {
                             Placeholder.parsed("purchaser", player.getName())
                     );
                 }
+
+                Component message = switch (BarterContainer.INSTANCE.getShoppingListManager().receive(player, itemStack)) {
+                    case MODIFIED -> Component.text("Progression has been made on your shopping list!", NamedTextColor.GREEN);
+                    case REMOVED -> Component.text("An item has been checked off your shopping list!", NamedTextColor.GREEN);
+                    case NOTHING -> null;
+                };
+                if (message != null) {
+                    player.sendMessage(message);
+                }
+
+
                 BarterManager.INSTANCE.save(store);
             }
             new BarterBuyGui(player, store).show(player);

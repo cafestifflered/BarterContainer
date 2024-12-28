@@ -1,14 +1,31 @@
 package com.stifflered.bartercontainer;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.barter.ChunkBarterStorage;
 import com.stifflered.bartercontainer.command.BarterContainerCommand;
+import com.stifflered.bartercontainer.command.CatalogueCommand;
 import com.stifflered.bartercontainer.item.ItemInstances;
 import com.stifflered.bartercontainer.listeners.*;
+import com.stifflered.bartercontainer.player.ShoppingListManager;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.plugin.lifecycle.event.LifecycleEvent;
+import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
+import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
 
 public class BarterContainer extends JavaPlugin implements Listener {
 
@@ -17,12 +34,18 @@ public class BarterContainer extends JavaPlugin implements Listener {
     public static BarterContainer INSTANCE;
     private ChunkBarterStorage chunkBarterStorage;
     private BarterContainerConfiguration configuration;
+    private ShoppingListManager shoppingListManager;
 
     @Override
     public void onEnable() {
         INSTANCE = this;
         chunkBarterStorage = new ChunkBarterStorage(BarterManager.INSTANCE);
+        this.shoppingListManager = new ShoppingListManager(this);
         Bukkit.getCommandMap().register("barterbarrels", new BarterContainerCommand());
+        Bukkit.getCommandMap().register("catalog", new CatalogueCommand());
+
+        shoppingListManager.registerCommands(this);
+
 
         this.register(
                 new ItemInstanceListener(),
@@ -75,5 +98,9 @@ public class BarterContainer extends JavaPlugin implements Listener {
 
     public BarterContainerConfiguration getConfiguration() {
         return configuration;
+    }
+
+    public ShoppingListManager getShoppingListManager() {
+        return shoppingListManager;
     }
 }
