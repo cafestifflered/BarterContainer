@@ -78,6 +78,8 @@ public class ShopListerItem extends ItemInstance {
             );
 
 
+            player.sendMessage(Components.prefixedSuccess(Component.text("Conversion Successful. Your shop is now open!")));
+            player.playSound(Sound.sound(org.bukkit.Sound.ENTITY_VILLAGER_WORK_MASON, Sound.Source.BLOCK, 1, 1));
             ItemUtil.subtract(event.getPlayer(), event.getItem());
             event.setUseInteractedBlock(Event.Result.DENY);
         } else {
