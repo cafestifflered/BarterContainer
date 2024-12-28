@@ -28,7 +28,6 @@ public class BarterContainerLogger {
     private Path path;
     private static final Logger LOGGER = LogManager.getLogger();
 
-
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public BarterContainerLogger() {
@@ -40,6 +39,13 @@ public class BarterContainerLogger {
         String log = "%s bought one %s from %s".formatted(player.getName(), bought, store.getKey());
         LOGGER.info(log);
         this.logToFile(log);
+        SERVICE.execute(() -> {
+            try {
+                BarterShopOwnerLogManager.addLog(store.getKey(), new BarterShopOwnerLogManager.TransactionRecord(System.currentTimeMillis(), player.getUniqueId(), player.getName(), bought.getType(), bought.getAmount()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 

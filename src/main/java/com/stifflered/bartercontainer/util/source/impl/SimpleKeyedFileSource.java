@@ -6,12 +6,10 @@ import com.stifflered.bartercontainer.util.source.ObjectSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public abstract class SimpleKeyedFileSource<K, T> implements ObjectSource<K, T> {
 
@@ -70,5 +68,16 @@ public abstract class SimpleKeyedFileSource<K, T> implements ObjectSource<K, T> 
         try (BufferedWriter writer = Files.newBufferedWriter(file)) {
             return this.saveToFile(type, writer);
         }
+    }
+
+    @Override
+    public List<T> getAll() throws Exception {
+        return Files.list(this.parent).map((file) -> {
+            try (BufferedReader reader = Files.newBufferedReader(file)) {
+                return this.loadFromFile(reader);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
     }
 }

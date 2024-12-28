@@ -7,14 +7,20 @@ import com.stifflered.bartercontainer.event.RemoveBarterContainer;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.store.BarterStoreImpl;
 import com.stifflered.bartercontainer.store.BarterStoreKey;
+import com.stifflered.bartercontainer.util.Components;
 import com.stifflered.bartercontainer.util.source.Sources;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.TileState;
+import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
@@ -103,6 +109,15 @@ public class BarterManager {
         return Optional.empty();
     }
 
+    public List<BarterStore> getAll() throws RuntimeException {
+        try {
+            return Sources.BARTER_STORAGE.getAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+
     public void saveAll() {
         storage.values().forEach(barterStore -> {
             try {
@@ -121,4 +136,17 @@ public class BarterManager {
         }
     }
 
+    public CompletableFuture<List<BarterStore>> getOwnedShops(Player player) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<BarterStore> stores = new ArrayList<>();
+            for (BarterStore store : BarterManager.INSTANCE.getAll()) {
+                // If they are the owner
+                if (player.getUniqueId().equals(store.getPlayerProfile().getId())) {
+                    stores.add(store);
+                }
+            }
+
+            return stores;
+        });
+    }
 }
