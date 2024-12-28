@@ -44,7 +44,7 @@ public class BarterShopOwnerLogManager {
             }
 
             if (purchases > 0) {
-                player.sendMessage(Component.text("You have had %s new purchases since you've been gone! Check your shops!".formatted(purchases), NamedTextColor.GREEN));
+                player.sendMessage(Component.text("Check your shops! %s new purchases have been made since you've been gone!".formatted(purchases), NamedTextColor.GREEN));
             }
         });
     }
