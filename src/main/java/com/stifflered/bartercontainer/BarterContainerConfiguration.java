@@ -52,6 +52,18 @@ public class BarterContainerConfiguration {
         return section.getString("purchase-from-player-message");
     }
 
+    public TransactionLogConfiguration getTransactionLogConfiguration() {
+        return new TransactionLogConfiguration(
+                section.getString("transactions.title"),
+                section.getString("transactions.hover"),
+                section.getString("transactions.timeFormat")
+        );
+    }
+
+    public record TransactionLogConfiguration(String title, String hover, String timeFormat) {
+
+    }
+
     private static ItemStack parse(ConfigurationSection section, String path) {
         ConfigurationSection item = section.getConfigurationSection(path);
 

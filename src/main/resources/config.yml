@@ -28,3 +28,9 @@ not-enough-price-item:
   lore:
     - "<gray>You do not have the required"
     - "<gray><red>items</red> for this store!"
+
+transactions:
+  title: "- <amount> x <itemtype>"
+  hover: "<purchaser> <time>"
+  # SEE https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+  timeFormat: "dd-MM-yyyy"

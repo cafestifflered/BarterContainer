@@ -1,12 +1,14 @@
 package com.stifflered.bartercontainer.util;
 
-import com.stifflered.bartercontainer.BarterContainer;
+import com.stifflered.bartercontainer.*;
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.store.BarterStoreKey;
 import com.stifflered.bartercontainer.util.source.impl.BarterStorage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.*;
+import net.kyori.adventure.text.minimessage.tag.resolver.*;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -20,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
+import java.time.format.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +33,8 @@ public class BarterShopOwnerLogManager {
 
     // Directory to store the transaction logs
     private static final String DIRECTORY_NAME = "purchase_transactions";
+    private static final BarterContainerConfiguration.TransactionLogConfiguration TRANSACTION_LOG_CONFIGURATION = BarterContainer.INSTANCE.getConfiguration().getTransactionLogConfiguration();
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(TRANSACTION_LOG_CONFIGURATION.timeFormat());
 
 
     public static void notifyNewPurchases(Player player) {
@@ -228,8 +233,20 @@ public class BarterShopOwnerLogManager {
         }
 
         public Component formatted() {
-            return Component.text(" - " + this.amount + "x " + this.itemType)
-                    .hoverEvent(Component.text(this.purchaserName + " " + Instant.ofEpochMilli(this.timestamp).toString()));
+            Component name = MiniMessage.miniMessage().deserialize(TRANSACTION_LOG_CONFIGURATION.title(), TagResolver.builder()
+                    .resolvers(
+                            Placeholder.component("amount", Component.text(this.amount)),
+                            Placeholder.component("itemtype", Component.text(this.itemType.name()))
+                    ).build());
+
+            Component hover = MiniMessage.miniMessage().deserialize(TRANSACTION_LOG_CONFIGURATION.hover(), TagResolver.builder()
+                    .resolvers(
+                            Placeholder.component("purchaser", Component.text(this.purchaserName)),
+                            Placeholder.component("timestamp", Component.text(FORMATTER.format(Instant.ofEpochMilli(this.timestamp))))
+                    ).build());
+
+
+            return name.hoverEvent(hover);
         }
     }
 }
