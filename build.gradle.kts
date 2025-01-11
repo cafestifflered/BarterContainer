@@ -27,7 +27,7 @@ dependencies {
 
 bukkit {
     main = "com.stifflered.bartercontainer.BarterContainer"
-    name = rootProject.name
+    name = "BarterBarrels"
     apiVersion = "1.19"
     version = "1.0.0"
     load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.STARTUP
