@@ -25,10 +25,12 @@ public class BarterStoreImpl implements BarterStore {
     private Inventory itemStacks;
     private Inventory currencyHolder;
     private ItemStack itemStack;
+    private final List<Location> locations;
 
-    public BarterStoreImpl(BarterStoreKey barterStoreKey, PlayerProfile playerProfile, List<ItemStack> itemStacks, List<ItemStack> currencyItems, ItemStack itemStack) {
+    public BarterStoreImpl(BarterStoreKey barterStoreKey, PlayerProfile playerProfile, List<ItemStack> itemStacks, List<ItemStack> currencyItems, ItemStack itemStack, List<Location> locations) {
         this.barterStoreKey = barterStoreKey;
         this.playerProfile = playerProfile;
+        this.locations = locations;
         this.itemStacks = Bukkit.createInventory(new SaveOnClose(this, () -> this.itemStacks), 27);
         this.itemStacks.setContents(itemStacks.toArray(new ItemStack[0]));
         this.currencyHolder = Bukkit.createInventory(new BankOwner(this), 27);
@@ -103,6 +105,11 @@ public class BarterStoreImpl implements BarterStore {
         }
 
         return BarterRole.VISITOR;
+    }
+
+    @Override
+    public List<Location> getLocations() {
+        return this.locations;
     }
 
 }

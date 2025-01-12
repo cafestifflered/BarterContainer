@@ -47,7 +47,12 @@ public class SimplePaginator extends ChestGui {
 
         this.addPane(pages);
 
+        StaticPane header = new StaticPane(0, 0, 9, 1);
+        header.fillWith(ItemUtil.BLANK);
+        this.addPane(header);
+
         StaticPane navigation = new StaticPane(0, 5, 9, 1);
+        navigation.fillWith(ItemUtil.BLANK);
         if (pages.getPage() > 0) {
             navigation.addItem(new GuiItem(PAGE_DOWN, event -> {
                 if (pages.getPage() > 0) {

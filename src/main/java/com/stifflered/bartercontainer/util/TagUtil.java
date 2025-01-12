@@ -54,7 +54,7 @@ public class TagUtil {
     }
 
     public static NamespacedKey of(String tag) {
-        return new NamespacedKey(BarterContainer.INSTANCE, tag);
+        return new NamespacedKey("bartercontainer", tag);
     }
 
     public static boolean hasTag(PersistentDataHolder holder, NamespacedKey key) {

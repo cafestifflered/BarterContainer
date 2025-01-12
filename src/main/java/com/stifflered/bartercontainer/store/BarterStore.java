@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.*;
+
 /**
  * Lets store in the bartering object:
  * - owner (player profile)
@@ -34,5 +36,7 @@ public interface BarterStore {
     void setCurrentItemPrice(ItemStack itemStack);
 
     BarterRole getRole(Player player);
+
+    List<Location> getLocations();
 
 }

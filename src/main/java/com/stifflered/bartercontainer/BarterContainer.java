@@ -7,8 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.barter.ChunkBarterStorage;
-import com.stifflered.bartercontainer.command.BarterContainerCommand;
-import com.stifflered.bartercontainer.command.CatalogueCommand;
+import com.stifflered.bartercontainer.command.*;
 import com.stifflered.bartercontainer.item.ItemInstances;
 import com.stifflered.bartercontainer.listeners.*;
 import com.stifflered.bartercontainer.player.ShoppingListManager;
@@ -43,8 +42,7 @@ public class BarterContainer extends JavaPlugin implements Listener {
         this.shoppingListManager = new ShoppingListManager(this);
         Bukkit.getCommandMap().register("barterbarrels", new BarterContainerCommand());
         Bukkit.getCommandMap().register("catalog", new CatalogueCommand());
-
-        shoppingListManager.registerCommands(this);
+        Bukkit.getCommandMap().register("shopping-list", new ShoppingListCommand());
 
 
         this.register(

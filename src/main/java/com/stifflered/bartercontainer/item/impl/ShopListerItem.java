@@ -10,7 +10,7 @@ import com.stifflered.bartercontainer.util.Components;
 import com.stifflered.bartercontainer.util.ItemUtil;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
@@ -20,8 +20,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.*;
 
 public class ShopListerItem extends ItemInstance {
 
@@ -65,8 +64,11 @@ public class ShopListerItem extends ItemInstance {
                 return;
             }
 
+            List<Location> locationList = new ArrayList<>();
+            locationList.add(state.getLocation());
+
             BarterManager.INSTANCE.createNewStore(
-                    new BarterStoreImpl(new BarterStoreKeyImpl(UUID.randomUUID()), player.getPlayerProfile(), new ArrayList<>(), new ArrayList<>(), new ItemStack(Material.DIAMOND)),
+                    new BarterStoreImpl(new BarterStoreKeyImpl(UUID.randomUUID()), player.getPlayerProfile(), new ArrayList<>(), new ArrayList<>(), new ItemStack(Material.DIAMOND), locationList),
                     tileState.getPersistentDataContainer(),
                     state.getChunk()
             );

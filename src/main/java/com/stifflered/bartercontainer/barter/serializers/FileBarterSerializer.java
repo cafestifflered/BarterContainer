@@ -9,9 +9,8 @@ import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.store.BarterStoreImpl;
 import com.stifflered.bartercontainer.store.BarterStoreKey;
 import com.stifflered.bartercontainer.util.TagUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import com.stifflered.bartercontainer.util.source.codec.*;
+import org.bukkit.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -33,6 +32,7 @@ public class FileBarterSerializer {
         this.storeItems(container, "currency_storage", barterStore.getCurrencyStorage());
 
         container.addProperty("price_item", Base64.getEncoder().encodeToString(barterStore.getCurrentItemPrice().serializeAsBytes()));
+        this.storeLocations(container, "locations", barterStore.getLocations());
     }
 
     public BarterStore getBarterStore(JsonObject container) {
@@ -46,8 +46,9 @@ public class FileBarterSerializer {
         List<ItemStack> currencyStorage = this.getItems(container,"currency_storage");
 
         ItemStack priceItem = ItemStack.deserializeBytes(Base64.getDecoder().decode(container.get("price_item").getAsString()));
+        List<Location> locations = this.getLocations(container,"locations");
 
-        return new BarterStoreImpl(barterStoreKey, playerProfile, saleItems, currencyStorage, priceItem);
+        return new BarterStoreImpl(barterStoreKey, playerProfile, saleItems, currencyStorage, priceItem, locations);
     }
 
     private void storeItems(JsonObject main, String name, Inventory inventory) {
@@ -80,4 +81,30 @@ public class FileBarterSerializer {
         return itemStacks;
     }
 
+    private void storeLocations(JsonObject main, String name, List<Location> locs) {
+        JsonArray array = new JsonArray();
+        main.add(name, array);
+        for (Location location :  locs) {
+            if (location != null) {
+                array.add(BlockLocationSerializer.INSTANCE.encode(location));
+            }
+        }
+    }
+
+    private List<Location> getLocations(JsonObject container, String name) {
+        List<Location> locations = new ArrayList<>();
+        if (!container.has(name)) {
+            return locations;
+        }
+
+        for (JsonElement obj : container.getAsJsonArray(name)) {
+            try {
+                locations.add(BlockLocationSerializer.INSTANCE.decode(obj.getAsJsonObject()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return locations;
+    }
 }

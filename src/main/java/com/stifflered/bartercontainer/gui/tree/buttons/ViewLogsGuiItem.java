@@ -26,13 +26,7 @@ public class ViewLogsGuiItem extends GuiItem {
     private static final Book LOADING = Book.book(Component.text(""), Component.text(""), List.of(Component.text("Loading...")));
 
     public ViewLogsGuiItem(BarterStore store) {
-        super(ItemUtil.wrapEdit(new ItemStack(Material.BOOK), (meta) -> {
-            Components.name(meta, Component.text("ⓘ View Logs", TextColor.fromHexString("#cfcfc4")));
-            Components.lore(meta, Components.miniSplit("""
-                    <gray>Click to <green>view</green> your container's,
-                    <gray>purchase logs.
-                    """));
-        }), (event) -> {
+        super(BarterContainer.INSTANCE.getConfiguration().getViewLogsItem(), (event) -> {
             HumanEntity clicker = event.getWhoClicked();
 
             clicker.openBook(LOADING);

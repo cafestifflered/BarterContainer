@@ -54,7 +54,7 @@ public class LegacyBarterSerializer {
             List<ItemStack> currencyStorage = this.getItems(container, CURRENCY_STORAGE);
             ItemStack itemStack = ItemStack.deserializeBytes(Base64.getDecoder().decode(container.get(PRICE_ITEM, PersistentDataType.STRING)));
 
-            return new BarterStoreImpl(new BarterStoreKeyImpl(uuid), playerProfile, itemStacks, currencyStorage, itemStack);
+            return new BarterStoreImpl(new BarterStoreKeyImpl(uuid), playerProfile, itemStacks, currencyStorage, itemStack, List.of());
         } catch (Exception e) {
             return null;
         }

@@ -22,6 +22,7 @@ public class BarterContainerCommand extends BukkitCommand {
         }
 
         player.getInventory().addItem(ItemInstances.SHOP_LISTER_ITEM.getItem());
+        player.getInventory().addItem(ItemInstances.SHOP_FIXER_ITEM.getItem());
         return true;
     }
 }

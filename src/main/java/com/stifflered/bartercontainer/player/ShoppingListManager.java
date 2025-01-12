@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.stifflered.bartercontainer.BarterContainer;
+import com.stifflered.bartercontainer.gui.catalogue.*;
 import com.stifflered.bartercontainer.util.BarterShopOwnerLogManager;
 import com.stifflered.bartercontainer.util.ListPaginator;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -12,16 +13,17 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.audience.*;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.*;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -32,6 +34,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
 
@@ -60,66 +63,10 @@ public class ShoppingListManager implements Listener {
         shoppingLists.remove(event.getPlayer());
     }
 
-    public void registerCommands(BarterContainer barterContainer) {
-        barterContainer.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event -> {
-            event.registrar().register(
-                    barterContainer.getPluginMeta(),
-                    Commands.literal("shopping-list").then(
-                                    Commands.literal("add").then(
-                                            Commands.argument("item", ArgumentTypes.resource(RegistryKey.ITEM)).then(
-                                                    Commands.argument("amount", IntegerArgumentType.integer(0))
-                                                            .executes(context -> {
-                                                                ItemType itemType = context.getArgument("item", ItemType.class);
-                                                                int amount = IntegerArgumentType.getInteger(context, "amount");
-                                                                if (context.getSource().getSender() instanceof Player player) {
-                                                                    player.sendMessage(Component.text("Added " + itemType.key() + " to your shopping list!", NamedTextColor.GREEN));
-                                                                    addItem(player, itemType.asMaterial(), amount);
-                                                                }
-
-                                                                return Command.SINGLE_SUCCESS;
-                                                            })
-                                            )
-                                    )
-                            )
-                            .then(Commands.literal("remove").then(
-                                            Commands.argument("item", ArgumentTypes.resource(RegistryKey.ITEM)).executes(context -> {
-                                                ItemType itemType = context.getArgument("item", ItemType.class);
-                                                if (context.getSource().getSender() instanceof Player player) {
-                                                    player.sendMessage(Component.text("Removed " + itemType.key() + " from your shopping list!", NamedTextColor.GREEN));
-                                                    removeItem(player, itemType.asMaterial());
-                                                }
-
-                                                return Command.SINGLE_SUCCESS;
-                                            })
-                                    )
-                            )
-                            .executes(context -> {
-                                if (context.getSource().getSender() instanceof Player player) {
-                                    ListPaginator<ShoppingList.ShoppingListEntry> entryListPaginator = new ListPaginator<>(getShoppingList(player).toDisplayList(), 13);
-                                    List<Component> pages = new ArrayList<>();
-                                    for (int i = 0; i < entryListPaginator.getTotalPages(); i++) {
-                                        TextComponent.Builder builder = Component.text();
-                                        for (ShoppingList.ShoppingListEntry record : entryListPaginator.getPage(i)) {
-                                            builder.append(record.styled.append(Component.text(" [X]", NamedTextColor.RED).clickEvent(ClickEvent.runCommand("/shopping-list remove " + record.material.key())))).appendNewline();
-                                        }
-                                        pages.add(builder.build());
-                                    }
-                                    player.openBook(Book.book(Component.text("Data"), Component.text("?"), pages));
-                                }
-                                return Command.SINGLE_SUCCESS;
-                            })
-                            .build(),
-                    "Add items",
-                    List.of()
-            );
-        }));
-    }
-
-
     public record ShoppingList(Map<Material, Integer> items) {
 
         public void addItem(Material material, int amount) {
-            this.items.put(material, amount);
+            this.items.put(material, this.items.getOrDefault(material, 0) + amount);
         }
 
         public void removeItem(Material material) {
@@ -183,6 +130,16 @@ public class ShoppingListManager implements Listener {
         Material material = itemStack.getType();
         ShoppingList list = getShoppingList(player);
         return list.receiveItem(material, itemStack.getAmount());
+    }
+
+    public MutateState receive(Player player, ItemStack itemStack, int amount) {
+        if (itemStack == null || itemStack.getType().isEmpty()) {
+            return MutateState.NOTHING;
+        }
+
+        Material material = itemStack.getType();
+        ShoppingList list = getShoppingList(player);
+        return list.receiveItem(material, amount);
     }
 
     private void loadShoppingList(Player player) {

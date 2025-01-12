@@ -5,6 +5,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.stifflered.bartercontainer.*;
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.gui.common.SimpleInnerGui;
 import com.stifflered.bartercontainer.store.BarterStore;
@@ -27,15 +28,7 @@ public class SetPriceGuiItem extends GuiItem {
     );
 
     public SetPriceGuiItem(BarterStore store) {
-        super(ItemUtil.wrapEdit(new ItemStack(Material.PAPER), (meta) -> {
-            Components.name(meta, Component.text("$ Set Price", TextColor.color(0, 255, 0)));
-            Components.lore(meta, Components.miniSplit("""
-                    <gray>Click to <green>change</green> your barter container's
-                    <gray>asking price.
-                                        
-                    <gray>Current Price:</gray> <item>
-                    """, Placeholder.component("item", getItemDescription(store.getCurrentItemPrice()))));
-        }), (event) -> {
+        super(BarterContainer.INSTANCE.getConfiguration().getSetPriceItem(Placeholder.component("item", getItemDescription(store.getCurrentItemPrice()))), (event) -> {
             openEditMenu(store, (Player) event.getWhoClicked());
         });
     }
@@ -78,7 +71,7 @@ public class SetPriceGuiItem extends GuiItem {
 
     public static ItemStack getPriceItem(BarterStore store) {
         return ItemUtil.wrapEdit(store.getCurrentItemPrice(), (meta) -> {
-            Components.name(meta, Component.text("Current Price Item", TextColor.color(0, 255, 0)));
+            Components.name(meta, BarterContainer.INSTANCE.getConfiguration().getPriceGuiItemName());
             Components.lore(meta, getItemDescription(store.getCurrentItemPrice()));
         });
     }

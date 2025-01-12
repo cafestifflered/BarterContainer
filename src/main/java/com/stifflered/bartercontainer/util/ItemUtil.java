@@ -28,6 +28,10 @@ import java.util.function.Supplier;
 
 public class ItemUtil {
 
+    public static final ItemStack BLANK = ItemUtil.wrapEdit(new ItemStack(Material.BLACK_STAINED_GLASS_PANE), (meta) -> {
+        meta.setHideTooltip(true);
+    });
+
     private static final ItemStack BACK = ItemUtil.wrapEdit(new ItemStack(Material.OAK_SIGN), (meta) -> {
         Components.name(meta, Component.text("← Back", NamedTextColor.AQUA));
         Components.lore(meta, Components.mini("<gray>Click to go back."));
