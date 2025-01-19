@@ -21,12 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class BarterShopOwnerLogManager {
@@ -34,7 +32,7 @@ public class BarterShopOwnerLogManager {
     // Directory to store the transaction logs
     private static final String DIRECTORY_NAME = "purchase_transactions";
     private static final BarterContainerConfiguration.TransactionLogConfiguration TRANSACTION_LOG_CONFIGURATION = BarterContainer.INSTANCE.getConfiguration().getTransactionLogConfiguration();
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(TRANSACTION_LOG_CONFIGURATION.timeFormat());
+    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat(TRANSACTION_LOG_CONFIGURATION.timeFormat());
 
 
     public static void notifyNewPurchases(Player player) {
@@ -242,7 +240,7 @@ public class BarterShopOwnerLogManager {
             Component hover = MiniMessage.miniMessage().deserialize(TRANSACTION_LOG_CONFIGURATION.hover(), TagResolver.builder()
                     .resolvers(
                             Placeholder.component("purchaser", Component.text(this.purchaserName)),
-                            Placeholder.component("timestamp", Component.text(FORMATTER.format(Instant.ofEpochMilli(this.timestamp))))
+                            Placeholder.component("time", Component.text(FORMATTER.format(new Date(this.timestamp))))
                     ).build());
 
 

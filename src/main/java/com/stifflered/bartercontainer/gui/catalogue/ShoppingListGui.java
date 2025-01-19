@@ -30,14 +30,14 @@ public class ShoppingListGui extends CatalogueGui {
 
     @Override
     protected GuiItem formatItem(ItemStack baseItem, List<BarterStore> items) {
-        return new GuiItem(ItemUtil.wrapEdit(baseItem, (meta) -> {
+        return new GuiItem(ItemUtil.wrapEdit(baseItem.clone(), (meta) -> {
             Components.lore(meta, config.getShoppingListLore());
         }), clickEvent -> {
             Player clicker = (Player) clickEvent.getWhoClicked();
 
             int amount = clickEvent.isShiftClick() ? 10 : 1;
             if (clickEvent.isRightClick()) {
-                BarterContainer.INSTANCE.getShoppingListManager().addItem(clicker, baseItem.getType(), amount);
+                BarterContainer.INSTANCE.getShoppingListManager().addItem(clicker, baseItem, amount);
                 player.sendMessage(
                         MiniMessage.miniMessage().deserialize(
                                 config.getShoppingListAddItemMessage(),

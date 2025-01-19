@@ -63,13 +63,13 @@ public class ShoppingListManager implements Listener {
         shoppingLists.remove(event.getPlayer());
     }
 
-    public record ShoppingList(Map<Material, Integer> items) {
+    public record ShoppingList(Map<ItemStack, Integer> items) {
 
-        public void addItem(Material material, int amount) {
-            this.items.put(material, this.items.getOrDefault(material, 0) + amount);
+        public void addItem(ItemStack itemStack, int amount) {
+            this.items.put(itemStack, this.items.getOrDefault(itemStack, 0) + amount);
         }
 
-        public void removeItem(Material material) {
+        public void removeItem(ItemStack material) {
             this.items.remove(material);
         }
 
@@ -77,7 +77,7 @@ public class ShoppingListManager implements Listener {
          * Decrement needed amount for the given material by 'amountReceived'.
          * Clamps to zero (does not remove).
          */
-        public MutateState receiveItem(Material material, int amountReceived) {
+        public MutateState receiveItem(ItemStack material, int amountReceived) {
             if (items.containsKey(material)) {
                 int current = items.get(material);
                 int updated = Math.max(current - amountReceived, 0);
@@ -95,7 +95,7 @@ public class ShoppingListManager implements Listener {
 
         public List<ShoppingListEntry> toDisplayList() {
             List<ShoppingListEntry> display = new ArrayList<>();
-            for (Map.Entry<Material, Integer> e : items.entrySet()) {
+            for (Map.Entry<ItemStack, Integer> e : items.entrySet()) {
                 display.add(new ShoppingListEntry(Component.translatable(e.getKey()).append(Component.text(" x" + e.getValue())), e.getKey()));
             }
 
@@ -103,7 +103,7 @@ public class ShoppingListManager implements Listener {
             return display;
         }
 
-        public record ShoppingListEntry(Component styled, Material material) {
+        public record ShoppingListEntry(Component styled, ItemStack itemStack) {
 
         }
     }
@@ -112,12 +112,12 @@ public class ShoppingListManager implements Listener {
         return this.shoppingLists.get(player);
     }
 
-    public void addItem(Player player, Material material, int amount) {
+    public void addItem(Player player, ItemStack material, int amount) {
         ShoppingList list = getShoppingList(player);
         list.addItem(material, amount);
     }
 
-    public void removeItem(Player player, Material material) {
+    public void removeItem(Player player, ItemStack material) {
         ShoppingList list = getShoppingList(player);
         list.removeItem(material);
     }
@@ -127,9 +127,8 @@ public class ShoppingListManager implements Listener {
             return MutateState.NOTHING;
         }
 
-        Material material = itemStack.getType();
         ShoppingList list = getShoppingList(player);
-        return list.receiveItem(material, itemStack.getAmount());
+        return list.receiveItem(itemStack, itemStack.getAmount());
     }
 
     public MutateState receive(Player player, ItemStack itemStack, int amount) {
@@ -137,30 +136,30 @@ public class ShoppingListManager implements Listener {
             return MutateState.NOTHING;
         }
 
-        Material material = itemStack.getType();
         ShoppingList list = getShoppingList(player);
-        return list.receiveItem(material, amount);
+        return list.receiveItem(itemStack, amount);
     }
 
     private void loadShoppingList(Player player) {
-        Map<Material, Integer> itemMap = new HashMap<>();
+        Map<ItemStack, Integer> itemMap = new HashMap<>();
         PersistentDataContainer pdc = player.getPersistentDataContainer();
 
         PersistentDataContainer shoppingList = pdc.get(KEY, PersistentDataType.TAG_CONTAINER);
         if (shoppingList != null) {
-            PersistentDataContainer items = shoppingList.get(KEY_DATA, PersistentDataType.TAG_CONTAINER);
-            for (NamespacedKey subKey : items.getKeys()) {
-                Integer amount = items.get(subKey, PersistentDataType.INTEGER);
-                Material material = Material.matchMaterial(subKey.getKey());
-                if (material != null) {
-                    itemMap.put(material, amount);
+            List<PersistentDataContainer> items = shoppingList.get(KEY_DATA, PersistentDataType.LIST.dataContainers());
+            for (PersistentDataContainer itemContainer : items) {
+                int amount = itemContainer.get(new NamespacedKey(plugin, "amount"), PersistentDataType.INTEGER);
+                String itemStackBase64 = itemContainer.get(new NamespacedKey(plugin, "itemstack"), PersistentDataType.STRING);
+
+                if (itemStackBase64 != null) {
+                    ItemStack itemStack = ItemStack.deserializeBytes(Base64.getDecoder().decode(itemStackBase64));
+                    itemMap.put(itemStack, amount);
                 }
             }
         }
 
         this.shoppingLists.put(player, new ShoppingList(itemMap));
     }
-
 
     private void saveShoppingList(Player player) {
         ShoppingList list = this.shoppingLists.get(player);
@@ -170,18 +169,24 @@ public class ShoppingListManager implements Listener {
 
         PersistentDataContainer pdc = player.getPersistentDataContainer();
         PersistentDataContainer shoppingListContainer = pdc.getAdapterContext().newPersistentDataContainer();
-        PersistentDataContainer itemsContainer = pdc.getAdapterContext().newPersistentDataContainer();
+        List<PersistentDataContainer> itemContainers = new ArrayList<>();
 
-        for (Map.Entry<Material, Integer> entry : list.items().entrySet()) {
-            Material material = entry.getKey();
+        for (Map.Entry<ItemStack, Integer> entry : list.items().entrySet()) {
             int amount = entry.getValue();
-            NamespacedKey materialKey = new NamespacedKey(this.plugin, material.name().toLowerCase(Locale.ROOT));
-            itemsContainer.set(materialKey, PersistentDataType.INTEGER, amount);
+            ItemStack itemStack = entry.getKey();
+
+            PersistentDataContainer itemContainer = pdc.getAdapterContext().newPersistentDataContainer();
+            itemContainer.set(new NamespacedKey(plugin, "amount"), PersistentDataType.INTEGER, amount);
+            itemContainer.set(new NamespacedKey(plugin, "itemstack"), PersistentDataType.STRING,
+                    Base64.getEncoder().encodeToString(itemStack.serializeAsBytes()));
+
+            itemContainers.add(itemContainer);
         }
 
-        shoppingListContainer.set(KEY_DATA, PersistentDataType.TAG_CONTAINER, itemsContainer);
+        shoppingListContainer.set(KEY_DATA, PersistentDataType.LIST.dataContainers(), itemContainers);
         pdc.set(KEY, PersistentDataType.TAG_CONTAINER, shoppingListContainer);
     }
+
 
     public enum MutateState {
         MODIFIED,

@@ -88,3 +88,7 @@ shopping-list:
   add-item-message: "<green>Added <amount> <item> to your shopping list!"
   remove-item-message: "<red>Removed <amount> <item> from your shopping list!"
   remove-item-message-fail: "<red>You don't have this item in your shopping list!"
+  remove-button: "<red>[X]"
+  add-button: "<green>[+]"
+  progress: "<green>Progression has been made on your shopping list!"
+  checked-off: "<green>An item has been checked off your shopping list!"

@@ -4,6 +4,7 @@ import com.stifflered.bartercontainer.BarterContainer;
 import com.stifflered.bartercontainer.store.BarterStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -36,7 +37,8 @@ public class BarterContainerLogger {
 
 
     public void logTransaction(Player player, ItemStack bought, BarterStore store) {
-        String log = "%s bought one %s from %s".formatted(player.getName(), bought, store.getKey());
+        Location location = store.getLocations().isEmpty() ? null : store.getLocations().get(0);
+        String log = "%s bought one %s from %s at %s owned by %s".formatted(player.getName(), bought, store.getKey(), location, store.getPlayerProfile().getId());
         LOGGER.info(log);
         this.logToFile(log);
         SERVICE.execute(() -> {

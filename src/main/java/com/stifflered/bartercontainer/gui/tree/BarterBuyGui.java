@@ -134,8 +134,8 @@ public class BarterBuyGui extends ChestGui {
                 }
 
                 Component message = switch (BarterContainer.INSTANCE.getShoppingListManager().receive(player, itemStack)) {
-                    case MODIFIED -> Component.text("Progression has been made on your shopping list!", NamedTextColor.GREEN);
-                    case REMOVED -> Component.text("An item has been checked off your shopping list!", NamedTextColor.GREEN);
+                    case MODIFIED -> BarterContainer.INSTANCE.getConfiguration().getShoppingListProgress();
+                    case REMOVED -> BarterContainer.INSTANCE.getConfiguration().getShoppingListCheckedOff();
                     case NOTHING -> null;
                 };
                 if (message != null) {

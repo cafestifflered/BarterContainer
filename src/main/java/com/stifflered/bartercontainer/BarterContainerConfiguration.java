@@ -84,6 +84,22 @@ public class BarterContainerConfiguration {
         return section.getString("shopping-list.remove-item-message");
     }
 
+    public Component getShoppingListX() {
+        return section.getComponent("shopping-list.remove-button", MiniMessage.miniMessage());
+    }
+
+    public Component getShoppingListPlus() {
+        return section.getComponent("shopping-list.add-button", MiniMessage.miniMessage());
+    }
+
+    public Component getShoppingListProgress() {
+        return section.getComponent("shopping-list.progress", MiniMessage.miniMessage());
+    }
+
+    public Component getShoppingListCheckedOff() {
+        return section.getComponent("shopping-list.checked-off", MiniMessage.miniMessage());
+    }
+
     public Component getShoppingListNotRemovedItemMessage() {
         return section.getComponent("shopping-list.remove-item-message-fail", MiniMessage.miniMessage());
     }
@@ -114,7 +130,6 @@ public class BarterContainerConfiguration {
     public ItemStack getViewLogsItem() {
         return parse(section, "view-logs-item");
     }
-
 
 
     public record TransactionLogConfiguration(String title, String hover, String timeFormat) {
