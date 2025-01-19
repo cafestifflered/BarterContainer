@@ -41,7 +41,7 @@ import java.util.*;
 
 public class ShoppingListManager implements Listener {
 
-    private static final NamespacedKey KEY = new NamespacedKey(BarterContainer.INSTANCE, "shopping-list");
+    private static final NamespacedKey KEY = new NamespacedKey(BarterContainer.INSTANCE, "shopping_list");
     private static final NamespacedKey KEY_DATA = new NamespacedKey(BarterContainer.INSTANCE, "-data");
 
     private final JavaPlugin plugin;
