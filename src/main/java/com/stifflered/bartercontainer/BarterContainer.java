@@ -43,6 +43,7 @@ public class BarterContainer extends JavaPlugin implements Listener {
         Bukkit.getCommandMap().register("barterbarrels", new BarterContainerCommand());
         Bukkit.getCommandMap().register("catalog", new CatalogueCommand());
         Bukkit.getCommandMap().register("shopping-list", new ShoppingListCommand());
+        Bukkit.getCommandMap().register("end-tracking", new EndTrackingCommand());
 
 
         this.register(

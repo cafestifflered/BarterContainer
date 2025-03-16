@@ -13,11 +13,13 @@ import net.kyori.adventure.text.*;
 import net.kyori.adventure.text.format.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.scheduler.*;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class CatalogueGui extends ChestGui {
 
@@ -98,7 +100,31 @@ public class CatalogueGui extends ChestGui {
 
             Components.lore(meta, lore);
         });
-        return new GuiItem(baseItem);
+        return new GuiItem(baseItem, new Consumer<InventoryClickEvent>() {
+            @Override
+            public void accept(InventoryClickEvent clickEvent) {
+                Location reference = clickEvent.getWhoClicked().getLocation();
+
+                Location closestLocation = null;
+                double smallestDistance = Double.MAX_VALUE;
+
+                for (BarterStore store : items) {
+                    if (!store.getLocations().isEmpty()) {
+                        for (Location location : store.getLocations()) {
+                            double distance = location.distance(reference);
+                            if (distance < smallestDistance) {
+                                smallestDistance = distance;
+                                closestLocation = location;
+                            }
+                        }
+                    }
+                }
+
+                if (closestLocation != null) {
+                    TrackingManager.instance().track((Player) clickEvent.getWhoClicked(), closestLocation);
+                }
+            }
+        });
     }
 
     private static List<GuiItem> getListedItems() {

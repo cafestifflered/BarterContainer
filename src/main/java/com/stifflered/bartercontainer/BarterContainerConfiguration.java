@@ -145,4 +145,26 @@ public class BarterContainerConfiguration {
         });
     }
 
+    public TrackingSystemConfiguration getTrackingSystemConfiguration() {
+        ConfigurationSection trackingSection = section.getConfigurationSection("tracking-system");
+        if (trackingSection == null) {
+            return new TrackingSystemConfiguration(
+                    MiniMessage.miniMessage().deserialize("<gray>Start Tracking"),
+                    MiniMessage.miniMessage().deserialize("<gray>End Tracking"),
+                    10,
+                    3
+            );
+        }
+
+        Component startTracking = trackingSection.getComponent("start-tracking", MiniMessage.miniMessage());
+        Component endTracking = trackingSection.getComponent("end-tracking", MiniMessage.miniMessage());
+        double trackRange = trackingSection.getDouble("track-range", 5);
+        double arrowRange = trackingSection.getDouble("arrow-range", 3);
+
+        return new TrackingSystemConfiguration(startTracking, endTracking, trackRange, arrowRange);
+    }
+
+    public record TrackingSystemConfiguration(Component startTracking, Component endTracking, double trackRange, double arrowRange) {
+    }
+
 }

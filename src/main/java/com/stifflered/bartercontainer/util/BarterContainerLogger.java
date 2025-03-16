@@ -19,9 +19,10 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.*;
 
 public class BarterContainerLogger {
 
@@ -38,13 +39,34 @@ public class BarterContainerLogger {
 
     public void logTransaction(Player player, ItemStack bought, BarterStore store) {
         Location location = store.getLocations().isEmpty() ? null : store.getLocations().get(0);
-        String log = "%s bought one %s from %s at %s owned by %s".formatted(player.getName(), bought, store.getKey(), location, store.getPlayerProfile().getId());
+        String log = "%s bought one %s from %s at %s owned by %s for %s".formatted(player.getName(), bought, store.getKey(), location, store.getPlayerProfile().getId(), store.getCurrentItemPrice());
         LOGGER.info(log);
         this.logToFile(log);
         SERVICE.execute(() -> {
             try {
                 BarterShopOwnerLogManager.addLog(store.getKey(), new BarterShopOwnerLogManager.TransactionRecord(System.currentTimeMillis(), player.getUniqueId(), player.getName(), bought.getType(), bought.getAmount()));
             } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        // Log the owners
+        SERVICE.execute(() -> {
+            try {
+                UUID ownerUuid = store.getPlayerProfile().getId();
+                Path file = new File(BarterContainer.INSTANCE.getDataFolder(), "owners-logs").toPath()
+                        .resolve(ownerUuid.toString() + ".txt");
+
+                Files.createDirectories(file.getParent());
+                if (Files.notExists(file)) {
+                    Files.createFile(file);
+                }
+
+                try (FileWriter writer = new FileWriter(file.toFile(), true)) {
+                    writer.write(Instant.now() + ": " + log + "\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         });

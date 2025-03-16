@@ -4,6 +4,7 @@ import com.stifflered.bartercontainer.BarterContainer;
 import com.stifflered.bartercontainer.barter.BarterManager;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.util.BarterShopOwnerLogManager;
+import com.stifflered.bartercontainer.util.TrackingManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,5 +33,6 @@ public class JoinEventListener implements Listener {
 
         });
 
+        TrackingManager.instance().untrack(event.getPlayer());
     }
 }
