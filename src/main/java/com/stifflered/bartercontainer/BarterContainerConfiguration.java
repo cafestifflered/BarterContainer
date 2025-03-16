@@ -147,14 +147,6 @@ public class BarterContainerConfiguration {
 
     public TrackingSystemConfiguration getTrackingSystemConfiguration() {
         ConfigurationSection trackingSection = section.getConfigurationSection("tracking-system");
-        if (trackingSection == null) {
-            return new TrackingSystemConfiguration(
-                    MiniMessage.miniMessage().deserialize("<gray>Start Tracking"),
-                    MiniMessage.miniMessage().deserialize("<gray>End Tracking"),
-                    10,
-                    3
-            );
-        }
 
         Component startTracking = trackingSection.getComponent("start-tracking", MiniMessage.miniMessage());
         Component endTracking = trackingSection.getComponent("end-tracking", MiniMessage.miniMessage());

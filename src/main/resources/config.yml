@@ -92,3 +92,9 @@ shopping-list:
   add-button: "<green>[+]"
   progress: "<green>Progression has been made on your shopping list!"
   checked-off: "<green>An item has been checked off your shopping list!"
+
+tracking-system:
+  start-tracking: <gray>Start Tracking
+  end-tracking: <gray>End Tracking
+  track-range: 10
+  arrow-range: 3
