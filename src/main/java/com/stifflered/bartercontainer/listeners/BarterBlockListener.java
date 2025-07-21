@@ -13,6 +13,7 @@ import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.util.ItemUtil;
 import com.stifflered.bartercontainer.util.Sounds;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -161,20 +162,28 @@ public class BarterBlockListener implements Listener {
             }
         }
 
-        BarterManager.INSTANCE.getBarter(block.getLocation())
-                .ifPresent((barterStore) -> {
-                    Sounds.openChest(player);
-                    if (barterStore.getRole(player) == BarterRole.UPKEEPER || player.hasPermission("barterchests.edit_all")) {
-                        if (player.isSneaking()) {
-                            new BarterBuyGui(player, barterStore).show(player);
-                        } else {
-                            new BarterGui(barterStore).show(player);
-                        }
+        BarterManager.INSTANCE.getBarterAndForceTryToLoad(block.getLocation())
+                .ifPresent((loadResult) -> {
+                    if (loadResult.forceLoading()) {
+                        player.sendMessage(Component.text("Please try to click this barrel later! Loading... Note if it still doesnt load please contact an admin!", NamedTextColor.RED));
                         event.setUseInteractedBlock(Event.Result.DENY);
-                    } else {
-                        new BarterBuyGui(player, barterStore).show(player);
-                        event.setUseInteractedBlock(Event.Result.DENY);
+                        return;
                     }
+
+                    loadResult.store().ifPresent((store) -> {
+                        Sounds.openChest(player);
+                        if (store.getRole(player) == BarterRole.UPKEEPER || player.hasPermission("barterchests.edit_all")) {
+                            if (player.isSneaking()) {
+                                new BarterBuyGui(player, store).show(player);
+                            } else {
+                                new BarterGui(store).show(player);
+                            }
+                            event.setUseInteractedBlock(Event.Result.DENY);
+                        } else {
+                            new BarterBuyGui(player, store).show(player);
+                            event.setUseInteractedBlock(Event.Result.DENY);
+                        }
+                    });
                 });
     }
 

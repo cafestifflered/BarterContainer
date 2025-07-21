@@ -94,6 +94,40 @@ public class BarterManager {
         this.storage.remove(new BarterStoreKeyImpl(uuid));
     }
 
+
+    public record ForceLoadResult(Optional<BarterStore> store, boolean forceLoading) {
+
+    }
+
+    public Optional<ForceLoadResult> getBarterAndForceTryToLoad(Location location) {
+        Optional<BarterStoreKey> key = this.keyAtLocation(location);
+        if (key.isEmpty()) {
+            return Optional.of(new ForceLoadResult(Optional.empty(), false));
+        } else {
+            Optional<BarterStore> loaded = key.map(this.storage::get);
+            if (loaded.isEmpty()) {
+                BarterContainer.INSTANCE.getLogger().warning("NOTE: BARREL IS BEING FORCE LOADED " + key.get());
+                new BukkitRunnable(){
+
+                    @Override
+                    public void run() {
+                        try {
+                            BarterManager.INSTANCE.loadAndCacheContainer(key.get(), (store) -> true);
+                        } catch (Exception e) {
+                            BarterContainer.INSTANCE.getLogger().warning(e.getMessage());
+                            BarterContainer.INSTANCE.getLogger().warning("Failed to load BarterContainer: " + key);
+                            e.printStackTrace();
+                        }
+                    }
+                }.runTaskAsynchronously(BarterContainer.INSTANCE);
+
+                return Optional.of(new ForceLoadResult(loaded, true));
+            } else {
+                return Optional.of(new ForceLoadResult(loaded, false));
+            }
+        }
+    }
+
     public Optional<BarterStore> getBarter(Location location) {
         return this.keyAtLocation(location)
                 .map(this.storage::get);

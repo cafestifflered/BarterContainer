@@ -67,6 +67,7 @@ public class ChunkBarterStorage {
                     } catch (Exception e) {
                         BarterContainer.INSTANCE.getLogger().warning(e.getMessage());
                         BarterContainer.INSTANCE.getLogger().warning("Failed to load BarterContainer: " + uuid);
+                        e.printStackTrace();
                     }
                 }
             }
