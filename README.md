@@ -89,7 +89,7 @@ A chest-based bartering system built for **MineHa.us** — players can convert c
 BarterBarrels is **proprietary software**.  
 Use of this plugin requires purchasing a valid license from an authorized source.
 
-- You may run the plugin only on servers you own or operate.
+- You may run the plugin only on server(s) you own or operate.
 - You may modify the source code for private use only (no redistribution).
 - Redistribution, resale, or sublicensing is strictly prohibited.
 - Support and updates are available only to licensed users.
