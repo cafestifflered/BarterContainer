@@ -1,21 +1,33 @@
-MIT License
+Copyright (c) 2023–2025 Tim Stiffler-Dean and contributors.
+All rights reserved.
 
-Copyright (c) 2023 Tim Stiffler-Dean
+This software ("BarterBarrels") is a proprietary product licensed, not sold.
+By obtaining a copy, you agree to the following terms:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. LICENSE GRANT
+   - You are granted a non-exclusive, non-transferable license to use this
+     plugin on servers you own or operate.
+   - You may modify the source code for your own private use, provided that
+     such modifications are not redistributed.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. RESTRICTIONS
+   - You may NOT redistribute, resell, sublicense, or otherwise make this
+     plugin or derivative works available to third parties, whether in
+     original or modified form, without prior written permission.
+   - You may NOT claim ownership of the plugin or remove author attributions.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+3. SUPPORT & UPDATES
+   - Support and updates are only provided to users who have obtained a
+     legitimate copy through an authorized source.
+   - Unauthorized copies are not entitled to updates, fixes, or support.
+
+4. OWNERSHIP
+   - All rights, title, and interest in the plugin remain with the copyright
+     holder(s).
+   - This license does not grant any rights not expressly stated herein.
+
+5. DISCLAIMER
+   - The software is provided "AS IS" without warranties of any kind.
+   - The copyright holders shall not be liable for damages arising from the
+     use or inability to use the software.
+

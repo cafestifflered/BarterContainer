@@ -1,100 +1,81 @@
-styled-title: <player>'s Barter Container
+# ==============================================================================
+# 📦 Barter Chests — Configuration (types, numbers, formats only)
+#
+# This file now holds **structure-only** config:
+#   • Item TYPES (Material IDs)
+#   • Numeric ranges / toggles
+#   • Time/date format patterns
+#
+# 📝 All player/GUI text, names, lore, and messages have moved to: messages.yml
+#    (MiniMessage formatting lives there.)
+#
+# ==============================================================================
+
+# === 🧰 Core Items (TYPES ONLY) ===
 shop-lister-item:
   type: minecraft:name_tag
-  name: 'Shop Lister'
-  lore: ['<!italic><white>Click me on a container to', '<!italic><white>activate your bartering container!']
-purchase-from-player-message: '<green> <purchaser> has bought <count> x <type> from your Shop!'
+
 buy-item:
-  type: "minecraft:lime_candle"
-  name: "<green>◎ Open Shop"
-  lore:
-    - "<gray>Click an item to <green>buy</green>."
+  type: minecraft:lime_candle
 
 out-of-stock-item:
-  type: "minecraft:red_candle"
-  name: "<red>◎ Out of Stock"
-  lore:
-    - "<gray>This shop is <red>out</red> of stock!"
+  type: minecraft:red_candle
 
 shop-full-item:
-  type: "minecraft:red_candle"
-  name: "<red>◎ Full Shop"
-  lore:
-    - "<gray>This shop's bank is <red>full</red>!"
+  type: minecraft:red_candle
 
 not-enough-price-item:
-  type: "minecraft:red_candle"
-  name: "<red>◎ Can't afford!"
-  lore:
-    - "<gray>You do not have the required"
-    - "<gray><red>items</red> for this store!"
+  type: minecraft:red_candle
 
-transactions:
-  title: "- <amount> x <itemtype>"
-  hover: "<purchaser> <time>"
-  # SEE https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
-  timeFormat: "dd-MM-yyyy"
-
-# Existing keys above ...
-
-# New item sections
+# === 🧰 Shop Management Items (TYPES ONLY) ===
 view-shop-item:
-  type: "minecraft:chest"
-  name: "<color:#FF6666>◎ View Shop"
-  lore:
-    - "<gray>Click to <green>view</green> your container's items."
-    - "<gray>for sale."
+  type: minecraft:chest
 
 set-price-item:
-  type: "minecraft:paper"
-  name: "<color:#00FF00>◎ Set Price</color>"
-  lore:
-    - "<gray>Click to <green>change</green> your container's price."
-    - "<gray>Current Price: <item>"
+  type: minecraft:paper
 
 view-barter-bank-item:
-  type: "minecraft:cauldron"
-  name: "<color:#FF6666>◎ View Barter Bank"
-  lore:
-    - "<gray>Click to <green>view</green> your container's bank,"
-    - "<gray>which contains items that player's"
-    - "<gray>purchased your items with."
-    - ""
-    - "<blue>ℹ</blue> <white>Players cannot buy from your shop"
-    - "<white>if your bank is full."
+  type: minecraft:cauldron
 
 view-logs-item:
-  type: "minecraft:book"
-  name: "<color:#cfcfc4>ⓘ View Logs"
-  lore:
-    - "<gray>Click to <green>view</green> your container's"
-    - "<gray>purchase logs."
+  type: minecraft:book
 
-main:
-  set-price-item:
-    name: "<color:#00FF00>Current Price Item</color>"
-    lore:
+# === 🔎 Catalogue Search Button (TYPE ONLY) ===
+catalog-search-button-item:
+  type: minecraft:compass
 
-catalog:
-  title: "<purple>Catalogue GUI"
-  item-lore: ["<green>Sold At:"]
+# === 🧾 Transactions (format pattern only) ===
+transactions:
+  # Java DateTimeFormatter pattern (UTC assumed).
+  # Example: "yyyy-MM-dd HH:mm 'UTC'"
+  time_pattern: "yyyy-MM-dd HH:mm 'UTC'"
 
-
-shopping-list:
-  lore:
-    - "<gray>Left Click + 1"
-    - "<gray>Right Click - 1"
-    - "<gray>Shift Click +- 10"
-  add-item-message: "<green>Added <amount> <item> to your shopping list!"
-  remove-item-message: "<red>Removed <amount> <item> from your shopping list!"
-  remove-item-message-fail: "<red>You don't have this item in your shopping list!"
-  remove-button: "<red>[X]"
-  add-button: "<green>[+]"
-  progress: "<green>Progression has been made on your shopping list!"
-  checked-off: "<green>An item has been checked off your shopping list!"
-
+# === 📍 Tracking System (numeric ranges only) ===
 tracking-system:
-  start-tracking: <gray>Start Tracking
-  end-tracking: <gray>End Tracking
   track-range: 10
   arrow-range: 3
+
+# === 🧑‍🎨 Head Cache ===
+head-cache:
+  # If true, when a (Floodgate) Bedrock player joins we'll resolve & cache a Java-compatible
+  # textures property immediately, so their head always renders in GUIs thereafter.
+  preload-on-join: true
+
+  # Purge cached heads if the player hasn't joined for this many days.
+  # Use -1 to never purge.
+  purge-after-days: -1
+
+  # Revalidation TTL for cached entries (how long until we refresh in background).
+  # Default 7 (days).
+  refresh-ttl-days: 7
+
+# === 📒 Directory GUI (optional fallback texture for owner heads) ===
+# This is only read if you choose to supply a static, pre-cached skin.
+# Leave both strings empty to disable (default). No network calls are made either way.
+directory:
+  fallback_texture:
+    # Base64-encoded "textures" JSON for a skin (e.g., Steve/Alex or your branded skin).
+    # Example (truncated): eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHBzOi8v...
+    value: ""
+    # Signature can be left empty for public/unverified textures.
+    signature: ""

@@ -1,0 +1,50 @@
+name: BarterBarrels
+main: com.stifflered.bartercontainer.BarterContainer
+version: 1.0.0
+api-version: '1.20'
+
+authors: [Owen1212055, ArZorMC]
+
+commands:
+  barterbarrels:
+    description: Root admin command for BarterBarrels (reload, give items)
+    usage: "/barterbarrels <reload|givelister|givefixer> ..."
+    permission: barterbarrels.admin
+    aliases: [barterbarrel]
+  catalog:
+    description: Open the Barter Catalogue UI
+    usage: "/catalog"
+    permission: barterchests.catalog
+  directory:
+    description: Open the Shop Owner Directory
+    usage: "/directory"
+    permission: barterbarrels.directory
+  endtracking:
+    description: Stop active tracking
+    usage: "/endtracking"
+    #shoppinglist:
+    #description: Open and edit your shopping list
+    #usage: "/shoppinglist"
+    #permission: barterchests.shopping-list
+
+permissions:
+  barterbarrels.admin:
+    default: op
+    children:
+      barterbarrels.reload: true
+      barterbarrels.givelister: true
+      barterbarrels.givefixer: true
+
+  barterbarrels.reload:
+    default: op
+  barterbarrels.givelister:
+    default: op
+  barterbarrels.givefixer:
+    default: op
+
+  barterchests.catalog:
+    default: true
+  barterbarrels.directory:
+    default: true
+  barterchests.shopping-list:
+    default: true

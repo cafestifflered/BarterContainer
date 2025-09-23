@@ -1,11 +1,12 @@
 package com.stifflered.bartercontainer.barter.serializers;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+
 import com.stifflered.bartercontainer.barter.BarterStoreKeyImpl;
 import com.stifflered.bartercontainer.store.BarterStore;
 import com.stifflered.bartercontainer.store.BarterStoreImpl;
-import com.stifflered.bartercontainer.store.BarterStoreKey;
 import com.stifflered.bartercontainer.util.TagUtil;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -13,27 +14,55 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * Serializer for the *legacy* on-block (PDC) format of BarterStore data.
+
+ * This predates the file-based JSON serializer and stores everything directly
+ * in a block's {@link PersistentDataContainer}, using Base64-encoded ItemStacks.
+
+ * Keys used (all under the plugin's namespace via TagUtil.of):
+ *  - key               → store UUID
+ *  - player_uuid       → owner UUID
+ *  - player_name       → last known owner name
+ *  - shop_items        → semicolon-separated Base64 ItemStacks (sale inventory)
+ *  - currency_storage  → semicolon-separated Base64 ItemStacks (bank)
+ *  - price_item        → Base64 ItemStack (current price)
+
+ * Notes:
+ *  - Inventory arrays are flattened into a *single* semicolon-delimited string.
+ *  - Empty slots are saved as an empty string "" (so slot alignment is preserved).
+ *  - On read, "" becomes an AIR stack.
+ *  - {@link #getBarterStore(PersistentDataContainer)} returns null if any
+ *    critical parse fails; caller should treat that as "not a legacy store".
+ */
 public class LegacyBarterSerializer {
 
+    // Core identity
     private static final NamespacedKey BARTER_KEY = TagUtil.of("key");
 
+    // Owner metadata
     private static final NamespacedKey NAME_UUID = TagUtil.of("player_uuid");
     private static final NamespacedKey NAME_PLAYER = TagUtil.of("player_name");
 
+    // Inventories + price
     private static final NamespacedKey SHOP_ITEMS = TagUtil.of("shop_items");
     private static final NamespacedKey CURRENCY_STORAGE = TagUtil.of("currency_storage");
     private static final NamespacedKey PRICE_ITEM = TagUtil.of("price_item");
 
+    /**
+     * Write all store data into a block's PersistentDataContainer using the legacy format.
+     */
     public void saveBarterStore(BarterStore barterStore, PersistentDataContainer container) {
         container.set(BARTER_KEY, PersistentDataType.STRING, barterStore.getKey().key().toString());
 
         PlayerProfile playerProfile = barterStore.getPlayerProfile();
-        container.set(NAME_UUID, PersistentDataType.STRING, playerProfile.getId().toString());
-        container.set(NAME_PLAYER, PersistentDataType.STRING, playerProfile.getName());
+        container.set(NAME_UUID, PersistentDataType.STRING, Objects.requireNonNull(playerProfile.getId()).toString());
+        container.set(NAME_PLAYER, PersistentDataType.STRING, Objects.requireNonNull(playerProfile.getName()));
 
         this.storeItems(container, SHOP_ITEMS, barterStore.getSaleStorage());
         this.storeItems(container, CURRENCY_STORAGE, barterStore.getCurrencyStorage());
@@ -41,12 +70,17 @@ public class LegacyBarterSerializer {
         container.set(PRICE_ITEM, PersistentDataType.STRING, Base64.getEncoder().encodeToString(barterStore.getCurrentItemPrice().serializeAsBytes()));
     }
 
+    /**
+     * Attempt to read a legacy-formatted BarterStore from the given PDC.
+     *
+     * @return a reconstructed {@link BarterStoreImpl}, or null if parsing fails
+     */
     @Nullable
     public BarterStore getBarterStore(PersistentDataContainer container) {
         try {
-            UUID uuid = UUID.fromString(container.get(BARTER_KEY, PersistentDataType.STRING));
+            UUID uuid = UUID.fromString(Objects.requireNonNull(container.get(BARTER_KEY, PersistentDataType.STRING)));
             PlayerProfile playerProfile = Bukkit.createProfile(
-                    UUID.fromString(container.get(NAME_UUID, PersistentDataType.STRING)),
+                    UUID.fromString(Objects.requireNonNull(container.get(NAME_UUID, PersistentDataType.STRING))),
                     container.get(NAME_PLAYER, PersistentDataType.STRING)
             );
 
@@ -54,20 +88,26 @@ public class LegacyBarterSerializer {
             List<ItemStack> currencyStorage = this.getItems(container, CURRENCY_STORAGE);
             ItemStack itemStack = ItemStack.deserializeBytes(Base64.getDecoder().decode(container.get(PRICE_ITEM, PersistentDataType.STRING)));
 
+            // Legacy format had no locations stored → pass empty list
             return new BarterStoreImpl(new BarterStoreKeyImpl(uuid), playerProfile, itemStacks, currencyStorage, itemStack, List.of());
         } catch (Exception e) {
+            // Any failure (missing keys, bad Base64, etc.) → treat as not legacy / unreadable
             return null;
         }
     }
 
-
+    /**
+     * Decode a semicolon-separated Base64 string of ItemStacks from the PDC.
+     * - "" entries become AIR to preserve slot positions.
+     * - Missing key → empty list.
+     */
     private List<ItemStack> getItems(PersistentDataContainer container, NamespacedKey namespacedKey) {
         List<ItemStack> itemStacks = new ArrayList<>();
         if (!container.has(namespacedKey)) {
             return itemStacks;
         }
 
-        for (String base64 : container.get(namespacedKey, PersistentDataType.STRING).split(";")) {
+        for (String base64 : Objects.requireNonNull(container.get(namespacedKey, PersistentDataType.STRING)).split(";")) {
             if (!base64.isEmpty()) {
                 itemStacks.add(ItemStack.deserializeBytes(Base64.getDecoder().decode(base64)));
             } else {
@@ -78,7 +118,12 @@ public class LegacyBarterSerializer {
         return itemStacks;
     }
 
+    /**
+     * Encode an inventory's contents into a semicolon-separated Base64 string
+     * and store under the given key in the PDC.
 
+     * Null slots → "" (empty string)
+     */
     private void storeItems(PersistentDataContainer container, NamespacedKey namespacedKey, Inventory inventory) {
         List<String> strings = new ArrayList<>();
         for (ItemStack itemStack : inventory.getContents()) {

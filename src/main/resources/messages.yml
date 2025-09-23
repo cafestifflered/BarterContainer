@@ -1,0 +1,783 @@
+# === 🎨 Message Style Guide (MiniMessage) ===
+# Titles:        <gradient:#8b5cf6:#3b82f6><bold><italic>Title</italic></bold></gradient>
+# Buttons/Names: <bold><#a78bfa>Label</#a78bfa></bold>
+# Lore text:     <#9ca3af>Muted descriptive text…</#9ca3af>
+# Success:       <bold><#22c55e>Success!</#22c55e></bold>
+# Error:         <bold><#ef4444>Error message</#ef4444></bold>
+# Highlights:    <white>Value</white> / <#fde68a>Value</#fde68a>
+# Nav Chips:     <#93c5fd>Next / Prev</#93c5fd>
+
+# === 💬 MiniMessage Formatting ===
+# Most plugin messages (including GUI labels and action bars) support MiniMessage.
+# MiniMessage uses tags like <red>, <bold>, <hover:...> to style your text.
+#
+# ✅ Basic Examples:
+# - <red>Red Text</red>
+# - <bold><yellow>Bold Yellow</yellow></bold>
+# - <#ff0000>Hex Color Example</#ff0000>
+# - <gradient:#fbbf24:#9b5de5>Gradient Text</gradient>
+#
+# 🖱️ Interactive Tags:
+# - <hover:show_text:'Extra info'><green>Hover Me</green></hover>
+# - <click:run_command:'/help'><aqua>Click Me</aqua></click>
+#
+# ⚠️ CLOSING TAGS REQUIRED:
+#   Every tag must be properly closed.
+#   ❌ Incorrect: <bold><yellow>Missing closing tag
+#   ✅ Correct:   <bold><yellow>Styled</yellow></bold>
+#
+# 📌 Built-in Placeholders (used across messages):
+# PLAYER / PEOPLE
+# - <player>        → Shop owner's username (inventory titles)
+# - <owner>         → Owner name in “All Barrels” contexts
+# - <buyer>         → Buyer display name
+# - <purchaser>     → Buyer name in owner notifications
+#
+# ITEMS & AMOUNTS
+# - <item>          → Material or pretty item name
+# - <items>         → Count of items (plural-friendly)
+# - <type>          → Bukkit Material enum (e.g., DIAMOND)
+# - <name>          → Display name from an ItemStack
+# - <amount>        → Integer quantity of items
+# - <units>         → Total units sold (aggregates)
+# - <tx>            → Number of transactions
+# - <count>         → Generic count (context-specific)
+# - <price>         → Price label or item used as currency
+# - <level>         → Enchant/effect level (1+; UI may romanize)
+#
+# TIME & DATES
+# - <when>          → Formatted timestamp of an event
+# - <abs>           → Absolute time (e.g., 2025-01-31 14:22)
+# - <rel>           → Relative time (e.g., “2h ago”)
+# - <last>          → Last purchase timestamp for a buyer
+# - <days>          → Window length used in consistency
+# - <week>          → Week number within a month
+# - <month>         → Month key used by snapshots (YYYY-MM)
+# - <time>          → Compact time string for log hover
+# - <seconds>       → Duration in seconds (effects)
+# - <ms>            → Milliseconds (e.g., reload duration)
+#
+# PAGINATION
+# - <page>          → Current page (1-based)
+# - <pages>         → Total pages
+#
+# ANALYTICS / STATS
+# - <series>        → Comma-separated daily sales series
+# - <stab>          → Stability subscore (percent)
+# - <rec>           → Recency subscore (percent)
+# - <trend>         → Trend subscore (percent)
+# - <wstab>         → Stability weight (percent)
+# - <wrec>          → Recency weight (percent)
+# - <wtrend>        → Trend weight (percent)
+# - <final>         → Overall blended score (percent)
+# - <score>         → Tile score shown in lore (percent)
+# - <mean>          → Mean of dampened series
+# - <std>           → Standard deviation
+# - <cv>            → Coefficient of variation
+# - <stability>     → Raw stability value before ×100
+# - <lambda>        → Exponential decay parameter
+# - <weights>       → Comma-separated recency weights
+# - <sum>           → Weighted sum for recency
+# - <total>         → Sum of all values in window
+# - <slope>         → OLS slope (per day)
+# - <relslope>      → Relative slope vs mean
+# - <absrelslope>   → |relslope|
+# - <maxslope>      → Normalization cap for slope
+# - <steepness>     → |relslope| / <maxslope>
+# - <recency>       → Recency (0–1) used in math lines
+# - <pct>           → Generic percent used in breakdowns
+#
+# KEYS, PATHS & IDS
+# - <key>           → Store key (world:x:y:z etc.)
+# - <uuid>          → UUID of a container/shop
+# - <path>          → Filesystem path (e.g., cache dir)
+# - <world>         → World key (e.g., minecraft:overworld)
+# - <expected>      → Expected value in validation
+# - <actual>        → Actual value found
+# - <detail>        → Error/exception detail
+# - <chunk_x>       → Chunk X coordinate
+# - <chunk_z>       → Chunk Z coordinate
+# - <itemtype>      → Material used in legacy log rows
+# - <query>         → User’s search query (Catalogue)
+# - <value>         → Config value (used in warnings)
+#
+# These placeholders are replaced automatically by the plugin when messages are sent.
+# Not all messages use placeholders — only those that require dynamic data.
+# Only use placeholders in messages that support them, or they will appear as raw text.
+#
+# 🔧 Tips:
+# - To disable a message entirely, set its value to an empty string: ""
+# - For advanced formatting: https://docs.advntr.dev/minimessage/format.html
+
+
+# ==============================================================================
+# 🪟 GUI & UX — Main shop UIs, catalogue, logs, and stats
+#   Everything that renders inside inventory menus or forms.
+# ==============================================================================
+gui:
+  # ──────────────────────────────────────────────────────────────────────────
+  # 🧰 Main / Shop UI (titles & common state items)
+  #   Used in a single-barrel context (viewer sees an owner’s shop).
+  #   Placeholders: <player> (owner shown in title)
+  # ──────────────────────────────────────────────────────────────────────────
+  main:
+    # Inventory title for an individual shop window
+    title: "<gradient:#8b5cf6:#3b82f6><italic><player>'s Barter Barrel</italic></gradient>"
+
+    # Primary “open shop” button (user proceeds to pick an item)
+    open_shop_name: "<bold><#22c55e>Choose Purchase</#22c55e></bold>"
+    open_shop_lore:
+      - "<#9ca3af>Click an item to</#9ca3af> <#22c55e><bold>buy</bold></#22c55e><#9ca3af>.</#9ca3af>"
+
+    # Disabled-state tiles shown when inventory unable to transact
+    out_of_stock_name: "<#ef4444>◎ Out of Stock</#ef4444>"
+    out_of_stock_lore:
+      - "<#9ca3af>This shop is</#9ca3af> <#ef4444>out</#ef4444> <#9ca3af>of stock!</#9ca3af>"
+
+    shop_full_name: "<#ef4444>◎ Full Shop</#ef4444>"
+    shop_full_lore:
+      - "<#9ca3af>This shop's bank is</#9ca3af> <#ef4444>full</#ef4444><#9ca3af>!</#9ca3af>"
+
+    not_enough_price_name: "<#ef4444>◎ Can't afford!</#ef4444>"
+    not_enough_price_lore:
+      - "<#9ca3af>You do not have the required</#9ca3af>"
+      - "<#9ca3af><#ef4444>items</#ef4444> for this store!</#9ca3af>"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 🗂️ Catalogue (searchable listing across shops)
+  #   Renders titles, search prompts, and “paper” UI hints.
+  #   Placeholders: <query> for dynamic search text
+  # ──────────────────────────────────────────────────────────────────────────
+  catalogue:
+    # Inventory title when browsing the global catalogue
+    title: "<gradient:#8b5cf6:#3b82f6><italic>Barter Catalogue</italic></gradient>"
+    # Lore preface above “Sold at (coords)” in item entries
+    item_lore:
+      - "<#9ca3af>Sold at:</#9ca3af>"
+    search:
+      # Search button label + tooltip
+      button_name: "<bold><#a78bfa>Search</#a78bfa></bold>"
+      button_lore:
+        - "<#9ca3af>Click to search the catalog</#9ca3af>"
+        - "<#9ca3af>Type your query in chat</#9ca3af>"
+        - "<#9ca3af>or type <white>cancel</white> to abort</#9ca3af>"
+      # Chat prompt + progress + exit states
+      prompt: "<#9ca3af>Type your search in chat (or <white>cancel</white>).</#9ca3af>"
+      working: "<#9ca3af>Searching for:</#9ca3af> <white><query></white>"
+      canceled: "<#9ca3af>Search canceled.</#9ca3af>"
+      no_results: "<#ef4444>No results</#ef4444> <#9ca3af>for</#9ca3af> <white><query></white><#9ca3af>."
+      # Java edition: Anvil input skin
+      anvil_title: "<gradient:#8b5cf6:#3b82f6><italic>Catalogue Search</italic></gradient>"
+      anvil_paper_name: "<bold><#a78bfa>Search Query</#a78bfa></bold>"
+      anvil_paper_lore:
+        - "<#9ca3af>Type your query above.</#9ca3af>"
+        - "<#9ca3af>Type <white>cancel</white> to abort.</#9ca3af>"
+        - "<#9ca3af><italic>No XP will be consumed.</italic></#9ca3af>"
+      # Placeholder text inside the anvil rename field (plain text)
+      anvil_placeholder: "Type here…"
+      # Bedrock edition: simple form input
+      bedrock_title: "<gradient:#8b5cf6:#3b82f6><italic>Catalogue Search</italic></gradient>"
+      bedrock_label: "<#9ca3af>Enter your search:</#9ca3af>"
+      # Placeholder text inside the Bedrock form (plain text)
+      bedrock_placeholder: "type here…"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 📇 Directory (owner index)
+  #   Shows one head per shop owner, with lore for shop count and top sellers.
+  #   Placeholders:
+  #     <owner> → player name of the shop owner
+  #     <shops> → total number of shops owned
+  #     <item>  → best-selling item name (pretty formatted)
+  #     <amount>→ amount sold (aggregated across barrels)
+  # ──────────────────────────────────────────────────────────────────────────
+  directory:
+    # Inventory title for the owner directory window
+    title: "<gradient:#8b5cf6:#3b82f6><italic>Shop Owner Directory</italic></gradient>"
+    # Player head label (owner’s name)
+    head_name: "<bold><#a78bfa><owner></#a78bfa></bold>"
+    # Lore line when no sales records exist
+    head_lore_no_sales: "<#9ca3af>No sales data yet</#9ca3af>"
+    # Lore header above top-selling items
+    head_lore_top_header: "<#93c5fd>Top sellers</#93c5fd>"
+    # Lore row for each best-selling item (no quantities shown)
+    head_lore_top_item: "• <white><item></white>"
+    # Barrier placeholder name when no shop owners exist
+    no_owners_name: "<bold><#ef4444>No shop owners found</#ef4444></bold>"
+    # Barrier placeholder lore when no shop owners exist
+    no_owners_lore: "<#9ca3af>There are no active shops yet.</#9ca3af>"
+    # Message shown when tracking fails (no barrels found for this owner)
+    no_barrels: "<bold><#ef4444>No barrels found for this owner.</#ef4444></bold>"
+    # Fallback label when a name can't be resolved (never show UUIDs)
+    unknown_owner: "Unknown"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 📄 Paginator (generic next/prev labels used by multiple UIs)
+  # ──────────────────────────────────────────────────────────────────────────
+  paginator:
+    # Display names for the in-inventory arrow buttons
+    next: "<#93c5fd>Next Page ⟼</#93c5fd>"
+    prev: "<#93c5fd>⟻ Prev Page</#93c5fd>"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 🌳 Tree UIs (editor, contents, currency, logs entry points)
+  #   Buttons & titles that appear in tree-style menus opened from the shop.
+  # ──────────────────────────────────────────────────────────────────────────
+  tree:
+    # ── Set Price (small editor)
+    #   Small editor overlay for choosing a price item.
+    #   Placeholders: <item> for the current price material/name
+    set_price:
+      # Title bar of the price editor GUI
+      title: "<gradient:#8b5cf6:#3b82f6><italic>Set Price</italic></gradient>"
+      # Button shown in shop UIs to open the editor (includes current item)
+      button_name: "<bold><#a78bfa>Set Price:</#a78bfa></bold> <white><item></white>"
+      button_lore:
+        - "<#9ca3af>Click to change the price item.</#9ca3af>"
+      # Lore attached to the “Price” slot item
+      price_item_name: "<bold><#a78bfa>Price</#a78bfa></bold>"
+      price_item_lore:
+        - "<#9ca3af>Current price:</#9ca3af> <white><item></white>"
+      # Center-slot instructions inside the editor grid
+      instruction_lore:
+        - "<#9ca3af>Click with an item on your cursor</#9ca3af>"
+        - "<#9ca3af>to</#9ca3af> <#22c55e><bold>override</bold></#22c55e> <#9ca3af>the price item.</#9ca3af>"
+
+    # ── Owner tools exposed as menu items
+    view_contents:
+      # Inventory title when viewing items listed for sale
+      title: "<gradient:#8b5cf6:#3b82f6><italic>Shop Items</italic></gradient>"
+      name: "<bold><#a78bfa>View Shop Contents</#a78bfa></bold>"
+      lore:
+        - "<#9ca3af>Open the shop's sale inventory.</#9ca3af>"
+
+    view_currency:
+      # Inventory title when viewing the internal “bank”
+      title: "<gradient:#8b5cf6:#3b82f6><italic>Barter Bank</italic></gradient>"
+      name: "<bold><#a78bfa>View Barter Bank</#a78bfa></bold>"
+      lore:
+        - "<#9ca3af>Open the shop's currency storage.</#9ca3af>"
+
+    view_logs:
+      # Button to open Logs & Analytics hub (single-barrel)
+      name: "<bold><#a78bfa>Logs & Analytics</#a78bfa></bold>"
+      lore:
+        - "<#9ca3af>Open the logs & analytics hub.</#9ca3af>"
+
+    # ── Single-barrel titles used by BuyerHistory* GUIs
+    # Heads grid (this barrel only)
+    buyer_history:
+      title_ownerless: "<gradient:#8b5cf6:#3b82f6><italic>Buyer History — This Barrel</italic></gradient>"
+      title_with_owner: "<gradient:#8b5cf6:#3b82f6><italic>Buyer History — This Barrel</italic></gradient>"
+
+    # Paper list for a specific buyer (this barrel only)
+    buyer_history_detail:
+      # Placeholders: <buyer>
+      title: "<gradient:#8b5cf6:#3b82f6><italic>Buyer Purchases — <buyer></italic></gradient>"
+
+    # Unfiltered chronological list (this barrel only)
+    buyer_history_all:
+      title_ownerless: "<gradient:#8b5cf6:#3b82f6><italic>All Purchases — This Barrel</italic></gradient>"
+      title_with_owner: "<gradient:#8b5cf6:#3b82f6><italic>All Purchases — This Barrel</italic></gradient>"
+
+    # ── All-barrels (aggregate buyer history UIs)
+    # Master heads grid across all barrels (optionally scoped to <owner>)
+    all_buyer_history:
+      title_ownerless: "<gradient:#8b5cf6:#3b82f6><italic>Buyer History — All Barrels</italic></gradient>"
+      title_with_owner: "<gradient:#8b5cf6:#3b82f6><italic>Buyer History — All Barrels</italic></gradient>"
+      # Paginator controls inside grid
+      nav_prev_name: "<#93c5fd>⟻ Previous Page</#93c5fd>"
+      nav_next_name: "<#93c5fd>Next Page ⟼</#93c5fd>"
+      nav_page_label: "<#9ca3af>Page</#9ca3af> <white><page></white>/<white><pages></white>"
+      # Back to the All Barrels hub
+      back_to_hub_name: "<bold><#a78bfa>Back</#a78bfa></bold>"
+      back_to_hub_lore:
+        - "<#9ca3af>Return to All Barrels Hub</#9ca3af>"
+      # Featured top purchaser tile
+      # Placeholders: <tx>, <items>, <last>
+      top_purchaser_name: "<bold><#a78bfa>Top Purchaser</#a78bfa></bold>"
+      top_purchaser_lore:
+        - "<#9ca3af>Purchases:</#9ca3af> <white><tx></white>  <#9ca3af>Items:</#9ca3af> <white><items></white>"
+        - "<#9ca3af>Last:</#9ca3af> <white><last></white>"
+        - "<#9ca3af>Click to view this buyer</#9ca3af>"
+      top_purchaser_empty_lore:
+        - "<#9ca3af>No data yet</#9ca3af>"
+      # Individual head entries
+      head_name: "<bold><#a78bfa><buyer></#a78bfa></bold>"
+      head_lore:
+        - "<#9ca3af>Purchases:</#9ca3af> <white><tx></white>  <#9ca3af>Items:</#9ca3af> <white><items></white>"
+        - "<#9ca3af>Last:</#9ca3af> <white><last></white>"
+        - "<#9ca3af>Click to view this buyer</#9ca3af>"
+      # Jump to unfiltered purchase list (all barrels)
+      all_purchases_button_name: "<bold><#a78bfa>All Purchases</#a78bfa></bold>"
+      all_purchases_button_lore:
+        - "<#9ca3af>Newest → Oldest (unfiltered, all barrels)</#9ca3af>"
+
+    # Unfiltered paper list across all barrels (optionally scoped to <owner>)
+    all_buyer_history_all:
+      # Inventory titles
+      title_ownerless: "<gradient:#8b5cf6:#3b82f6><italic>All Purchases — All Barrels</italic></gradient>"
+      title_with_owner: "<gradient:#8b5cf6:#3b82f6><italic>All Purchases — All Barrels</italic></gradient>"
+      # Paginator controls + back link
+      nav_prev_name: "<#93c5fd>⟻ Previous Page</#93c5fd>"
+      nav_next_name: "<#93c5fd>Next Page ⟼</#93c5fd>"
+      nav_page_label: "<#9ca3af>Page</#9ca3af> <white><page></white>/<white><pages></white>"
+      back_name: "<bold><#a78bfa>Back to Buyer List</#a78bfa></bold>"
+      back_lore:
+        - "<#9ca3af>All Buyer History</#9ca3af>"
+      # Paper item rows (with stack-name fallback)
+      # Placeholders: <name>, <item>, <amount>, <buyer>, <when>, <price>
+      paper_title_from_stack: "<bold><white><name> × <amount></white></bold>"
+      paper_title_fallback: "<bold><white><item> × <amount></white></bold>"
+      lore_buyer: "<#9ca3af>Buyer:</#9ca3af> <white><buyer></white>"
+      lore_when: "<#9ca3af>When:</#9ca3af> <white><when></white>"
+      lore_price: "<#9ca3af>Price:</#9ca3af> <white><price></white>"
+      lore_spacer: "<#9ca3af> </#9ca3af>"
+      lore_details_header: "<#9ca3af>Item details:</#9ca3af>"
+
+    # Per-buyer detail view across all barrels
+    all_buyer_history_detail:
+      # Placeholders: <buyer>
+      title: "<gradient:#8b5cf6:#3b82f6><italic>All Buyer Purchases — <buyer></italic></gradient>"
+      # Paginator + back link
+      nav_prev_name: "<#93c5fd>⟻ Previous Page</#93c5fd>"
+      nav_next_name: "<#93c5fd>Next Page ⟼</#93c5fd>"
+      nav_page_label: "<#9ca3af>Page</#9ca3af> <white><page></white>/<white><pages></white>"
+      back_name: "<bold><#a78bfa>Back to Buyer List</#a78bfa></bold>"
+      back_lore:
+        - "<#9ca3af>All Buyer History</#9ca3af>"
+      # Paper rows
+      paper_title_from_stack: "<bold><white><name> × <amount></white></bold>"
+      paper_title_fallback: "<bold><white><item> × <amount></white></bold>"
+      lore_when: "<#9ca3af>When:</#9ca3af> <white><when></white>"
+      lore_buyer: "<#9ca3af>Buyer:</#9ca3af> <white><buyer></white>"
+      lore_price: "<#9ca3af>Price:</#9ca3af> <white><price></white>"
+      lore_spacer: "<#9ca3af> </#9ca3af>"
+      lore_details_header: "<#9ca3af>Item details:</#9ca3af>"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 🧭 All-barrels Logs & Analytics hub + All-shops stats dashboard
+  #   Entrypoints shown when switching to “All Barrels” scope.
+  # ──────────────────────────────────────────────────────────────────────────
+  all_log_book_hub:
+    # Inventory titles (ownerless vs scoped)
+    # Placeholders: <owner> (when scoped)
+    title_ownerless: "<gradient:#8b5cf6:#3b82f6><italic>All Barrels — Logs & Analytics</italic></gradient>"
+    title_with_owner: "<gradient:#8b5cf6:#3b82f6><italic>All Barrels — <owner></italic></gradient>"
+    # Back to the single shop main menu
+    back_main_name: "<bold><#a78bfa>Back to Main Menu</#a78bfa></bold>"
+    back_main_lore:
+      - "<#9ca3af>Open this shop’s main menu</#9ca3af>"
+    # Open aggregate stats across all barrels
+    all_stats_name: "<bold><#a78bfa>All Shop Stats</#a78bfa></bold>"
+    all_stats_lore:
+      - "<#9ca3af>Totals across all barrels</#9ca3af>"
+      - "<#9ca3af>Last sale, unique purchasers, top item</#9ca3af>"
+      - "<#9ca3af>Consistency scores (7-day)</#9ca3af>"
+      - "<#9ca3af>Click to open</#9ca3af>"
+    # Async preview tile for top items (across all)
+    top_items_name: "<bold><#a78bfa>Top Selling Items</#a78bfa></bold>"
+    top_items_loading_lore:
+      - "<#9ca3af>— Top 3 across all barrels —</#9ca3af>"
+      - "<#9ca3af>Loading…</#9ca3af>"
+    top_items_ready_lore_header: "<#9ca3af>— Top 3 across all barrels —</#9ca3af>"
+    top_items_ready_row: "<#9ca3af><item> —</#9ca3af> <white><amount></white>"
+    top_items_error_lore:
+      - "<#9ca3af>— Top 3 across all barrels —</#9ca3af>"
+      - "<bold><#ef4444>(failed to read logs)</#ef4444></bold>"
+    top_items_empty_lore:
+      - "<#9ca3af>— Top 3 across all barrels —</#9ca3af>"
+      - "<#9ca3af>No sales yet</#9ca3af>"
+    # Buyer history entry point
+    buyer_history_name: "<bold><#a78bfa>All Buyer History</#a78bfa></bold>"
+    buyer_history_lore:
+      - "<#9ca3af>Heads for unique purchasers</#9ca3af>"
+      - "<#9ca3af>Click to open</#9ca3af>"
+    # Switch back to single-barrel mode
+    single_barrel_mode_name: "<bold><#a78bfa>Single Barrel Mode</#a78bfa></bold>"
+    single_barrel_mode_lore:
+      - "<#9ca3af>Open Logs & Analytics for this barrel</#9ca3af>"
+
+  # All-shops (aggregate) stats board shown from the hub above
+  all_shop_stats:
+    # Inventory title
+    title: "<gradient:#8b5cf6:#3b82f6><italic>All Shops — Stats</italic></gradient>"
+    # Topline metrics (row 1)
+    total_sales_name: "<bold><#a78bfa>Total Sales (All-Time)</#a78bfa></bold>"
+    total_sales_lore_units: "<#9ca3af>Units:</#9ca3af> <white><units></white>"
+    total_sales_lore_tx: "<#9ca3af>Transactions:</#9ca3af> <white><tx></white>"
+    total_sales_no_data: "<#9ca3af>No data across shops</#9ca3af>"
+    last_sale_name: "<bold><#a78bfa>🕓 Last Sale (Any Shop)</#a78bfa></bold>"
+    last_sale_lore_item: "<#9ca3af>💎 Item:</#9ca3af> <white><item></white> <#9ca3af>(</#9ca3af><white><amount></white><#9ca3af>)</#9ca3af>"
+    last_sale_lore_buyer: "<#9ca3af>Buyer:</#9ca3af> <white><buyer></white>"
+    last_sale_lore_abs: "<#9ca3af>When:</#9ca3af> <white><abs></white>"
+    last_sale_lore_since: "<#9ca3af>Since:</#9ca3af> <white><rel></white>"
+    last_sale_no_data: "<#9ca3af>No sales yet across shops</#9ca3af>"
+    unique_purchasers_name: "<bold><#a78bfa>Unique Purchasers</#a78bfa></bold>"
+    unique_purchasers_lore: "<#9ca3af>Count (all-time):</#9ca3af> <white><count></white>"
+    unique_purchasers_no_data: "<#9ca3af>No data across shops</#9ca3af>"
+    top_item_name: "<bold><#a78bfa>Top-Selling Item</#a78bfa></bold>"
+    top_item_lore_row: "<#9ca3af><item> (</#9ca3af><white><units></white> <#9ca3af>units)</#9ca3af>"
+    top_item_lore_footer: "<#9ca3af>(All-time, grouped by Material, across all shops)</#9ca3af>"
+    top_item_no_data: "<#9ca3af>No data across shops</#9ca3af>"
+    # Consistency tiles (row 2)
+    overall_tile_name: "<bold><#a78bfa>Overall Consistency</#a78bfa></bold>"
+    stability_tile_name: "<bold><#a78bfa>Stability Score</#a78bfa></bold>"
+    recency_tile_name: "<bold><#a78bfa>Recency Score</#a78bfa></bold>"
+    trend_tile_name: "<bold><#a78bfa>Trend Score</#a78bfa></bold>"
+    # Fallback lore if dynamic composition is unavailable
+    tile_lore_no_data: "<#9ca3af>No data</#9ca3af>"
+    # Utility tiles
+    more_tbd_name: "<bold><#a78bfa>More (TBD)</#a78bfa></bold>"
+    more_tbd_lore:
+      - "<#9ca3af>Reserved for future stat</#9ca3af>"
+      - "<#9ca3af>…coming soon</#9ca3af>"
+    # Navigation back
+    back_name: "<bold><#a78bfa>Back</#a78bfa></bold>"
+    back_lore:
+      - "<#9ca3af>Return to All Barrels Hub</#9ca3af>"
+    # Empty-state chat messages + detailed breakdowns (sent to chat on click)
+    msg_no_shops: "<#9ca3af>No shops found for this owner.</#9ca3af>"
+    msg_no_data_across: "<#9ca3af>No sales across all shops yet.</#9ca3af>"
+    # Chat math breakdowns — Placeholders: see top “Analytics / Stats”
+    overall_header: "<#93c5fd>─ Overall Consistency (last <days> days, all shops)</#93c5fd>"
+    overall_series: "<#9ca3af>  • Daily sales (0=today):</#9ca3af> <white><series></white>"
+    overall_parts: "<#9ca3af>  • Stability:</#9ca3af> <white><stab>%</white> <#9ca3af>, Recency:</#9ca3af> <white><rec>%</white> <#9ca3af>, Trend:</#9ca3af> <white><trend>%</white>"
+    overall_weights: "<#9ca3af>  • Weights → Stability</#9ca3af> <white><wstab>%</white> <#9ca3af>, Recency</#9ca3af> <white><wrec>%</white> <#9ca3af>, Trend</#9ca3af> <white><wtrend>%</white>"
+    overall_final: "<#22c55e><bold>  = Final: <final>%</bold></#22c55e>"
+    stability_header: "<#93c5fd>─ Stability (evenness day-to-day, all shops)</#93c5fd>"
+    stability_series: "<#9ca3af>  • Daily sales:</#9ca3af> <white><series></white>"
+    stability_dampened: "<#9ca3af>  • Dampened (log1p):</#9ca3af> <white><series></white>"
+    stability_math: "<#9ca3af>  • Mean(dampened) =</#9ca3af> <white><mean></white> <#9ca3af>, StdDev =</#9ca3af> <white><std></white> <#9ca3af>→ CV =</#9ca3af> <white><cv></white>"
+    stability_final: "<#9ca3af>  • Stability = 1 / (1 + CV) =</#9ca3af> <white><stability></white>"
+    stability_pct: "<#22c55e><bold>  = <pct>%</bold></#22c55e>"
+    recency_header: "<#93c5fd>─ Recency (recent sales weigh more, all shops)</#93c5fd>"
+    recency_series: "<#9ca3af>  • Daily sales:</#9ca3af> <white><series></white>"
+    recency_weights: "<#9ca3af>  • Weights λ=<lambda>:</#9ca3af> <white><weights></white>"
+    recency_math: "<#9ca3af>  • Weighted sum =</#9ca3af> <white><sum></white>  <#9ca3af>|  Total =</#9ca3af> <white><total></white>"
+    recency_final: "<#9ca3af>  • Recency = Weighted / Total =</#9ca3af> <white><recency></white>"
+    recency_pct: "<#22c55e><bold>  = <pct>%</bold></#22c55e>"
+    trend_header: "<#93c5fd>─ Trend (flat or gentle slope is better, all shops)</#93c5fd>"
+    trend_dampened: "<#9ca3af>  • Dampened (log1p):</#9ca3af> <white><series></white>"
+    trend_math: "<#9ca3af>  • OLS slope =</#9ca3af> <white><slope></white> <#9ca3af>/day, mean =</#9ca3af> <white><mean></white> <#9ca3af>→ relSlope =</#9ca3af> <white><relslope></white>"
+    trend_softmap: "<#9ca3af>  • steepness = |relSlope| / maxSlope =</#9ca3af> <white><absrelslope></white> <#9ca3af>/</#9ca3af> <white><maxslope></white> <#9ca3af>=</#9ca3af> <white><steepness></white>"
+    trend_final: "<#9ca3af>  • Trend = 1 / (1 + steepness) =</#9ca3af> <white><trend></white>"
+    trend_pct: "<#22c55e><bold>  = <pct>%</bold></#22c55e>"
+
+# ==============================================================================
+# 📊 SINGLE-SHOP STATS (separate dashboard inside the shop scope)
+#   Mirrors All-shops stats but scoped to the open barrel.
+# ==============================================================================
+shop_stats:
+  # Title bar for the per-shop stats inventory
+  title: "<gradient:#8b5cf6:#3b82f6><italic>Shop Stats</italic></gradient>"
+  # Topline metrics (row 1)
+  total_sales_name: "<bold><#a78bfa>Total Sales</#a78bfa></bold>"
+  total_sales_lore_units: "<#9ca3af>Units:</#9ca3af> <white><units></white>"
+  total_sales_lore_tx: "<#9ca3af>Transactions:</#9ca3af> <white><tx></white>"
+  total_sales_no_data: "<#9ca3af>No data</#9ca3af>"
+  last_sale_name: "<bold><#a78bfa>🕓 Last Sale</#a78bfa></bold>"
+  last_sale_lore_item: "<#9ca3af>💎 Item:</#9ca3af> <white><item></white> <#9ca3af>(</#9ca3af><white><amount></white><#9ca3af>)</#9ca3af>"
+  last_sale_lore_buyer: "<#9ca3af>Buyer:</#9ca3af> <white><buyer></white>"
+  last_sale_lore_abs: "<#9ca3af>Last Sold:</#9ca3af> <white><abs></white>"
+  last_sale_lore_since: "<#9ca3af>Time Since:</#9ca3af> <white><rel></white>"
+  last_sale_no_data: "<#9ca3af>No data</#9ca3af>"
+  unique_purchasers_name: "<bold><#a78bfa>Unique Purchasers</#a78bfa></bold>"
+  unique_purchasers_lore: "<#9ca3af>Count:</#9ca3af> <white><count></white>"
+  unique_purchasers_no_data: "<#9ca3af>No data</#9ca3af>"
+  top_item_name: "<bold><#a78bfa>Top-Selling Item</#a78bfa></bold>"
+  top_item_lore_row: "<#9ca3af><item> (</#9ca3af><white><units></white> <#9ca3af>units)</#9ca3af>"
+  top_item_lore_footer: "<#9ca3af>(All-time, grouped by Material)</#9ca3af>"
+  top_item_no_data: "<#9ca3af>No data</#9ca3af>"
+  # Consistency tiles (row 2)
+  overall_tile_name: "<bold><#a78bfa>Overall Consistency</#a78bfa></bold>"
+  stability_tile_name: "<bold><#a78bfa>Stability Score</#a78bfa></bold>"
+  recency_tile_name: "<bold><#a78bfa>Recency Score</#a78bfa></bold>"
+  trend_tile_name: "<bold><#a78bfa>Trend Score</#a78bfa></bold>"
+  # Tile lores (static fallbacks; dynamic comps are built in code)
+  overall_tile_lore_header: "<#9ca3af>Blend of Stability, Recency, Trend</#9ca3af>"
+  overall_tile_lore_score: "<#9ca3af>Score:</#9ca3af> <white><score>%</white>"
+  tile_lore_no_data: "<#9ca3af>No data</#9ca3af>"
+  stability_tile_lore_header: "<#9ca3af>Evenness day-to-day</#9ca3af>"
+  stability_tile_lore_score: "<#9ca3af>Score:</#9ca3af> <white><score>%</white>"
+  recency_tile_lore_header: "<#9ca3af>Recent activity emphasis</#9ca3af>"
+  recency_tile_lore_score: "<#9ca3af>Score:</#9ca3af> <white><score>%</white>"
+  trend_tile_lore_header: "<#9ca3af>Flat or gentle slope = better</#9ca3af>"
+  trend_tile_lore_score: "<#9ca3af>Score:</#9ca3af> <white><score>%</white>"
+  # Utility tiles + navigation
+  more_tbd_name: "<bold><#a78bfa>More (TBD)</#a78bfa></bold>"
+  more_tbd_lore:
+    - "<#9ca3af>Reserved for future stat</#9ca3af>"
+    - "<#9ca3af>…coming soon</#9ca3af>"
+  back_name: "<bold><#a78bfa>Back to Logs & Analytics</#a78bfa></bold>"
+  back_lore:
+    - "<#9ca3af>Return to previous menu</#9ca3af>"
+  # Empty-state chat + math breakdowns (sent on tile click)
+  msg_no_data: "<#9ca3af>No data for this shop yet.</#9ca3af>"
+  overall_header: "<#93c5fd>─ Overall Consistency (last <days> days)</#93c5fd>"
+  overall_series: "<#9ca3af>  • Daily sales (0=today):</#9ca3af> <white><series></white>"
+  overall_parts: "<#9ca3af>  • Stability:</#9ca3af> <white><stab>%</white> <#9ca3af>, Recency:</#9ca3af> <white><rec>%</white> <#9ca3af>, Trend:</#9ca3af> <white><trend>%</white>"
+  overall_weights: "<#9ca3af>  • Weights → Stability</#9ca3af> <white><wstab>%</white> <#9ca3af>, Recency</#9ca3af> <white><wrec>%</white> <#9ca3af>, Trend</#9ca3af> <white><wtrend>%</white>"
+  overall_final: "<#22c55e><bold>  = Final: <final>%</bold></#22c55e>"
+  stability_header: "<#93c5fd>─ Stability (evenness day-to-day)</#93c5fd>"
+  stability_series: "<#9ca3af>  • Daily sales:</#9ca3af> <white><series></white>"
+  stability_dampened: "<#9ca3af>  • Dampened (log1p):</#9ca3af> <white><series></white>"
+  stability_math: "<#9ca3af>  • Mean(dampened) =</#9ca3af> <white><mean></white> <#9ca3af>, StdDev =</#9ca3af> <white><std></white> <#9ca3af>→ CV =</#9ca3af> <white><cv></white>"
+  stability_final: "<#9ca3af>  • Stability = 1 / (1 + CV) =</#9ca3af> <white><stability></white>"
+  stability_pct: "<#22c55e><bold>  = <pct>%</bold></#22c55e>"
+  recency_header: "<#93c5fd>─ Recency (recent sales weigh more)</#93c5fd]"
+  recency_series: "<#9ca3af>  • Daily sales:</#9ca3af> <white><series></white>"
+  recency_weights: "<#9ca3af>  • Weights λ=<lambda>:</#9ca3af> <white><weights></white>"
+  recency_math: "<#9ca3af>  • Weighted sum =</#9ca3af> <white><sum></white>  <#9ca3af>|  Total =</#9ca3af> <white><total></white>"
+  recency_final: "<#9ca3af>  • Recency = Weighted / Total =</#9ca3af> <white><recency></white>"
+  recency_pct: "<#22c55e><bold>  = <pct>%</bold></#22c55e>"
+  trend_header: "<#93c5fd>─ Trend (flat or gentle slope is better)</#93c5fd]"
+  trend_dampened: "<#9ca3af>  • Dampened (log1p):</#9ca3af> <white><series></white>"
+  trend_math: "<#9ca3af>  • OLS slope =</#9ca3af> <white><slope></white> <#9ca3af>/day, mean =</#9ca3af> <white><mean></white> <#9ca3af>→ relSlope =</#9ca3af> <white><relslope></white>"
+  trend_softmap: "<#9ca3af>  • steepness = |relSlope| / maxSlope =</#9ca3af> <white><absrelslope></white> <#9ca3af>/</#9ca3af> <white><maxslope></white> <#9ca3af>=</#9ca3af> <white><steepness></white>"
+  trend_final: "<#9ca3af>  • Trend = 1 / (1 + steepness) =</#9ca3af> <white><trend></white>"
+  trend_pct: "<#22c55e><bold>  = <pct>%</bold></#22c55e>"
+
+# ==============================================================================
+# 🛒 BUY FLOW (confirm UI, hover details) + 🔔 NOTIFICATIONS
+#   Purchase confirmation tile + owner pings + single-barrel logs hub.
+# ==============================================================================
+buy:
+  # Confirm button in the purchase confirmation screen
+  confirm_name: "<bold><#22c55e>☑ Confirm Purchase</#22c55e></bold>"
+  confirm_lore:
+    - "<#9ca3af>Click to</#9ca3af> <bold><#22c55e>confirm</#22c55e></bold>"
+    - "<#9ca3af>your purchase.</#9ca3af>"
+  # Race condition feedback (another player grabbed the item first)
+  already_taken: "<bold><#ef4444>Looks like someone already took this item!</#ef4444></bold>"
+  # Owner notification sent per purchase
+  # Placeholders: <count> (qty), <type> (Material), <purchaser> (buyer)
+  owner_notify: "<#fde68a>+<count>x</#fde68a> <white><type></white> <#9ca3af>bought by</#9ca3af> <white><purchaser></white>"
+
+  # Hover detail lines used in confirmations/tooltips
+  # Placeholders: varies per line (<name>, <level>, <seconds>, <item>, <count>)
+  hover:
+    name: "<#9ca3af>Name: </#9ca3af>"
+    enchants: "<#9ca3af>Enchants: </#9ca3af>"
+    book_enchants: "<#9ca3af>Book Enchants: </#9ca3af>"
+    potion: "<#9ca3af>Potion: </#9ca3af>"
+    splash: "<#9ca3af>Splash: </#9ca3af>"
+    lingering: "<#9ca3af>Lingering: </#9ca3af>"
+    arrow: "<#9ca3af>Arrow: </#9ca3af>"
+    effects_header: "<#9ca3af>Effects:</#9ca3af>"
+    effect_line: "<#9ca3af> •</#9ca3af> <white><name> <level></white> <#9ca3af>(</#9ca3af><white><seconds></white><#9ca3af>s)</#9ca3af>"
+    contents_header: "<#9ca3af>Contents:</#9ca3af>"
+    contents_line: "<#9ca3af> •</#9ca3af> <white><item></white>"
+    contents_more: "<#9ca3af>…and</#9ca3af> <white><count></white> <#9ca3af>more</#9ca3af>"
+
+  # Single-barrel Logs & Analytics hub (entry points within the barrel)
+  log_book_hub:
+    # Inventory title
+    title: "<gradient:#8b5cf6:#3b82f6><italic>Logs & Analytics</italic></gradient>"
+    # Back to the main menu of the current shop
+    back_main_name: "<bold><#a78bfa>Back to Main Menu</#a78bfa></bold>"
+    back_main_lore:
+      - "<#9ca3af>Open this shop’s main menu</#9ca3af>"
+    # Open the single-shop stats board
+    all_stats_name: "<bold><#a78bfa>This Shop’s Stats</#a78bfa></bold>"
+    all_stats_lore:
+      - "<#9ca3af>All-time totals & unique purchasers</#9ca3af>"
+      - "<#9ca3af>Last sale & top-selling item</#9ca3af>"
+      - "<#9ca3af>Consistency scores (7-day)</#9ca3af>"
+      - "<#9ca3af>Click to open</#9ca3af>"
+    # Async preview of top items for this barrel
+    top_items_name: "<bold><#a78bfa>Top Selling Items</#a78bfa></bold>"
+    top_items_loading_lore:
+      - "<#9ca3af>— Top 3 in this barrel —</#9ca3af>"
+      - "<#9ca3af>Loading…</#9ca3af>"
+    top_items_ready_lore_header: "<#9ca3af>— Top 3 in this barrel —</#9ca3af>"
+    top_items_ready_row: "<#9ca3af><item> —</#9ca3af> <white><amount></white>"
+    top_items_error_lore:
+      - "<#9ca3af>— Top 3 in this barrel —</#9ca3af>"
+      - "<bold><#ef4444>(failed to read logs)</#ef4444></bold>"
+    top_items_empty_lore:
+      - "<#9ca3af>— Top 3 in this barrel —</#9ca3af>"
+      - "<#9ca3af>No sales yet</#9ca3af>"
+    # Buyer history (this barrel)
+    buyer_history_name: "<bold><#a78bfa>Buyer History</#a78bfa></bold>"
+    buyer_history_lore:
+      - "<#9ca3af>Recent buyers & repeat customers</#9ca3af>"
+      - "<#9ca3af>Click to open</#9ca3af>"
+    # Switch to global view
+    all_barrels_name: "<bold><#a78bfa>All Barrels Mode</#a78bfa></bold>"
+    all_barrels_lore:
+      - "<#9ca3af>View analytics across all barrels</#9ca3af>"
+      - "<#9ca3af>Click to open</#9ca3af>"
+
+# Owner ping shown on login if purchases happened while offline
+notifications:
+  # Placeholders: <count> = number of new purchases
+  owner_new_purchases: "<#22c55e>Check your shops!</#22c55e> <white><count></white> <#9ca3af>new purchases since you were gone.</#9ca3af>"
+
+# ==============================================================================
+# 🧰 ITEMS & TOOLS (admin items players can use)
+#   Custom ItemInstances and their interaction messages.
+# ==============================================================================
+items:
+  # Convert an empty vanilla container into a shop
+  shop_lister:
+    # Item display (name + lore)
+    item_name: "<bold><#a78bfa>Shop Lister</#a78bfa></bold>"
+    item_lore:
+      - "<!italic><white>Click me on a container to"
+      - "<!italic><white>activate your bartering container!"
+    # Interaction feedback (permission reuse done in code)
+    invalid_block: "<bold><#ef4444>The block you clicked is not a valid container!</#ef4444></bold>"
+    must_be_empty: "<#9ca3af>You can only convert</#9ca3af> <white>empty</white> <#9ca3af>containers!</#9ca3af>"
+    already_exists: "<#9ca3af>There is already a</#9ca3af> <white>barter container</white> <#9ca3af>at this location.</#9ca3af>"
+    success: "<bold><#22c55e>Conversion Successful.</#22c55e></bold> <#9ca3af>Your shop is now open!</#9ca3af>"
+
+  # Reattach block location metadata to an existing shop
+  shop_fixer:
+    item_name: "<bold><#a78bfa>Fixer Stick</#a78bfa></bold>"
+    invalid_block: "<bold><#ef4444>The block you clicked is not a valid container!</#ef4444></bold>"
+    fixed_location: "<bold><#22c55e>Fixed location!</#22c55e></bold>"
+
+# ==============================================================================
+# 📋 LISTS / STORES / LISTENERS (misc player-facing)
+# ==============================================================================
+shopping:
+  list:
+    # Suffix appended to items inside the shopping list displays
+    # Placeholders: <amount>
+    entry_suffix: " <#9ca3af>×</#9ca3af> <white><amount></white>"
+
+stores:
+  break:
+    # Shown when attempting to break a shop that still contains items/currency
+    must_empty: "<bold><#ef4444>Can't break shop:</#ef4444></bold> <#9ca3af>Empty both the</#9ca3af> <white>Barter Bank</white> <#9ca3af>and</#9ca3af> <white>Shop Items</white><#9ca3af> first.</#9ca3af>"
+
+listeners:
+  barter_block:
+    # Legacy migration notices when dismantling old-format barrels (DELETE perm required)
+    legacy_recreate: "<#fde68a>Barrels have been redone to help with item loss! Please recreate your barrel.</#fde68a>"
+    legacy_drop_warning: "<bold><#ef4444>NOTE:</#ef4444></bold> <#ef4444>Your items will be dropped on the floor…</#ef4444> <#9ca3af>Click again to confirm.</#9ca3af>"
+    # Temporary denial while force-loading (prevents double-open issues)
+    force_loading: "<bold><#ef4444>Loading…</#ef4444></bold> <#9ca3af>Please try to click this barrel again in a moment.</#9ca3af> <#9ca3af>If it still doesn't load, contact an admin.</#9ca3af>"
+
+# ==============================================================================
+# 📈 ANALYTICS (scheduler + legacy log text)
+#   Console/admin-facing lines during the weekly consistency job.
+# ==============================================================================
+analytics:
+  consistency:
+    # No owners/stores matched → skip the snapshot for <month>
+    # Placeholders: <month> (YYYY-MM)
+    snapshot_empty: "<#9ca3af>[Consistency]</#9ca3af> <#9ca3af>No owners/stores found; snapshot skipped for</#9ca3af> <white><month></white><#9ca3af>.</#9ca3af>"
+    # Per-owner write failure
+    # Placeholders: <owner>, <detail>
+    snapshot_failed_record: "<#ef4444>[Consistency]</#ef4444> <#9ca3af>Failed to record weekly score for</#9ca3af> <white><owner></white> <#9ca3af>—</#9ca3af> <white><detail></white>"
+    # Per-store read failure
+    # Placeholders: <key>, <detail>
+    snapshot_read_error_store: "<#ef4444>[Consistency]</#ef4444> <#9ca3af>Read error for store</#9ca3af> <white><key></white><#9ca3af>:</#9ca3af> <white><detail></white>"
+    # Success summary line (week-in-month)
+    # Placeholders: <month>, <week>
+    snapshot_complete: "<#9ca3af>[Consistency]</#9ca3af> <#9ca3af>Weekly consistency snapshot complete for</#9ca3af> <white><month></white> <#9ca3af>(Week</#9ca3af> <white><week></white><#9ca3af>).</#9ca3af>"
+    # Start/end state lines for logs and admin command feedback
+    snapshot_started_log: "<#9ca3af>[Consistency]</#9ca3af> <#9ca3af>Weekly snapshot starting…</#9ca3af>"
+    # Placeholders: <detail>
+    snapshot_failed_log: "<#ef4444>[Consistency]</#ef4444> <#9ca3af>Weekly snapshot failed:</#9ca3af> <white><detail></white>"
+    snapshot_ok_command: "<#22c55e>Weekly consistency snapshot executed.</#22c55e>"
+    snapshot_failed_command: "<#ef4444>Snapshot failed:</#ef4444> <white><detail></white>"
+
+  # Legacy “transactions” book formatting (hover uses transactions.timeFormat in config.yml)
+  logs:
+    transactions:
+      # Placeholders: <amount>, <itemtype>, <purchaser>, <time>
+      title: "- <amount> x <itemtype>"
+      hover: "<purchaser> <time>"
+
+# ==============================================================================
+# 🧩 UTIL & ADMIN (common buttons, command feedback, system text)
+#   Non-UI helper labels, errors, and internal system messages.
+# ==============================================================================
+util:
+  back_button:
+    # Generic back button used across inventories
+    name: "<#93c5fd>← Back</#93c5fd>"
+    lore: "<#9ca3af>Click to go back.</#9ca3af>"
+  paginator:
+    # Validation errors (admin/dev only; not player-actionable)
+    page_size_invalid: "<#ef4444>Page size must be greater than zero.</#ef4444>"
+    page_number_negative: "<#ef4444>Page number must be non-negative.</#ef4444>"
+  weak_storage:
+    # Thrown if an attempt is made to use a closed storage instance
+    closed: "<#ef4444>WeakStorage is closed.</#ef4444>"
+
+# Command feedback sent to players/console
+commands:
+  common:
+    # Permission & context guardrails
+    no_permission: "<bold><#ef4444>⛔ You don't have permission to use this.</#ef4444></bold>"
+    players_only: "<#9ca3af>This command can only be run by a player.</#9ca3af>"
+  reload:
+    # Reload lifecycle messages
+    # Placeholders: <ms> (duration), <count> (subsystems)
+    start: "<#93c5fd>Reloading BarterBarrels…</#93c5fd>"
+    success: "<bold><#22c55e>Reload complete</#22c55e></bold> <gray>(<ms> ms, <count> steps)</gray>"
+    # Placeholders: <detail>
+    fail: "<bold><#ef4444>Reload failed</#ef4444></bold> <gray><detail></gray>"
+
+# Internal system/status messages for container management and chunk scans
+barter:
+  manager:
+    # Informational line when a barrel is being force-loaded (interaction blocked)
+    # Placeholders: <key> (store key)
+    force_load_start: "<#9ca3af>NOTE: Barrel</#9ca3af> <white><key></white> <#9ca3af>is being force loaded.</#9ca3af>"
+    # Missing storage record for a known key
+    # Placeholders: <key>
+    missing_storage: "<#ef4444>[BarterBarrels] Missing storage for</#ef4444> <white><key></white> <#9ca3af>— caller should unlink this reference.</#9ca3af>"
+    # Load/save failure lines routed to logs
+    # Placeholders: <key>, <detail>
+    load_failed_title: "<bold><#ef4444>Failed to load BarterContainer:</#ef4444></bold> <white><key></white>"
+    load_failed_detail: "<#9ca3af>Cause:</#9ca3af> <white><detail></white>"
+    save_failed_title: "<bold><#ef4444>Failed to save BarterContainer:</#ef4444></bold> <white><key></white>"
+    save_failed_detail: "<#9ca3af>Cause:</#9ca3af> <white><detail></white>"
+  chunk:
+    # Orphaned reference pruned during chunk scan
+    # Placeholders: <uuid>, <chunk_x>, <chunk_z>
+    orphan_pruned: "<#f59e0b>Orphaned</#f59e0b> <#9ca3af>container</#9ca3af> <white><uuid></white> <#9ca3af>in chunk</#9ca3af> <white>(<chunk_x>,<chunk_z>)</white> <#9ca3af>— pruning reference.</#9ca3af>"
+    # Load failure for a container by UUID
+    # Placeholders: <uuid>, <detail>
+    load_failed_title: "<bold><#ef4444>Failed to load BarterContainer:</#ef4444></bold> <white><uuid></white>"
+    load_failed_detail: "<#9ca3af>Cause:</#9ca3af> <white><detail></white>"
+
+# Skin/Head service (filesystem/cache issues)
+skins:
+  head_service:
+    # Placeholders: <path> (absolute directory path)
+    cache_dir_failed: "<#ef4444>[HeadService]</#ef4444> <#9ca3af>Could not create skin cache directory:</#9ca3af> <white><path></white>"
+
+# Codec/storage-level errors routed to logs/exceptions
+codec:
+  block_location:
+    # Placeholders: <world> (namespaced world key)
+    bad_world_key: "<#ef4444>[Codec]</#ef4444> <#9ca3af>Invalid world key:</#9ca3af> <white><world></white>"
+    world_missing: "<#ef4444>[Codec]</#ef4444> <#9ca3af>Could not find world</#9ca3af> <white><world></white>"
+
+# Storage invariants/validation messages
+storage:
+  barter:
+    # Placeholders: <expected> (key), <actual> (file’s key)
+    key_mismatch: "<#ef4444>[Storage]</#ef4444> <#9ca3af>Store key mismatch — expected</#9ca3af> <white><expected></white> <#9ca3af>but file had</#9ca3af> <white><actual></white><#9ca3af>.</#9ca3af>"
+
+# Config validation errors (admin-side)
+config:
+  errors:
+    # Placeholders: <path>, <value>
+    missing_section: "<#ef4444>[Config]</#ef4444> <#9ca3af>Missing config section:</#9ca3af> <white><path></white>"
+    invalid_material: "<#ef4444>[Config]</#ef4444> <#9ca3af>Invalid or missing material at</#9ca3af> <white><path></white> <#9ca3af>(value=</#9ca3af><white><value></white><#9ca3af>)</#9ca3af>"
+    missing_tracking_section: "<#ef4444>[Config]</#ef4444> <#9ca3af>Missing 'tracking-system' section in config.yml</#9ca3af>"
+
+# Detected integrations (FYI in logs; toggle done in code)
+integrations:
+  worldguard_detected: "<#9ca3af>WorldGuard detected (hook disabled).</#9ca3af>"
+
+# Simple labels for the tracking feature (player-facing toggles)
+tracking:
+  start: "<#9ca3af>Start Tracking</#9ca3af>"
+  end: "<#9ca3af>End Tracking</#9ca3af>"

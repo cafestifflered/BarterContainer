@@ -1,88 +1,119 @@
 package com.stifflered.bartercontainer.command;
 
-import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
-import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.mojang.brigadier.*;
 import com.stifflered.bartercontainer.BarterContainer;
-import com.stifflered.bartercontainer.barter.BarterManager;
-import com.stifflered.bartercontainer.gui.catalogue.*;
-import com.stifflered.bartercontainer.gui.common.SimplePaginator;
-import com.stifflered.bartercontainer.player.*;
-import com.stifflered.bartercontainer.store.BarterStore;
-import com.stifflered.bartercontainer.util.*;
-import net.kyori.adventure.inventory.*;
-import net.kyori.adventure.text.*;
-import net.kyori.adventure.text.event.*;
-import net.kyori.adventure.text.format.NamedTextColor;
+import com.stifflered.bartercontainer.gui.catalogue.ShoppingListGui;
+import com.stifflered.bartercontainer.player.ShoppingListManager;
+import com.stifflered.bartercontainer.util.ListPaginator;
+import com.stifflered.bartercontainer.util.Messages;
+import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.defaults.BukkitCommand;
-import org.bukkit.entity.*;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class ShoppingListCommand extends BukkitCommand {
+/**
+ * Command: /shoppinglist
 
-    private final ShoppingListManager manager = BarterContainer.INSTANCE.getShoppingListManager();;
+ * Purpose:
+ *  - Displays and manages a player’s shopping list of desired items.
+ *  - Renders the list as an in-game Adventure book UI with clickable actions.
 
-    public ShoppingListCommand() {
-        super("shoppinglist");
-    }
+ * Permissions:
+ *  - Requires "barterchests.shopping-list".
+
+ * Behavior:
+ *  - Builds a list of entries from ShoppingListManager, plus a special “+” entry for adding new items.
+ *  - Paginates entries (13 per page).
+ *  - For each entry:
+ *      * Regular entry → shows styled component + ❌ to remove item.
+ *      * Special “+” entry → shows ➕ to open ShoppingListGui to add items.
+ *  - Opens a book for the player containing all pages of components.
+
+ * Notes:
+ *  - Registered via plugin.yml.
+ *  - Uses Adventure’s Book API to present interactive pages (instead of GUIs).
+ *  - ClickEvent.callback is used for dynamic in-session interactions.
+ */
+public class ShoppingListCommand implements CommandExecutor {
+
+    /** Singleton shopping list manager from plugin instance. */
+    private final ShoppingListManager manager = BarterContainer.INSTANCE.getShoppingListManager();
 
     @Override
-    public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
-        Player player = (Player) sender;
-        if (!sender.hasPermission("barterchests.shopping-list")) {
-            sender.sendMessage(Components.NO_PERMISSION);
+    public boolean onCommand(@NotNull CommandSender sender,
+                             @NotNull Command command,
+                             @NotNull String label,
+                             @NotNull String[] args) {
+        // Guard: players only
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Messages.mm("commands.common.players_only"));
             return true;
         }
-        // TODO: clean this up
-        ShoppingListManager.ShoppingList.ShoppingListEntry specialAddEntry = new ShoppingListManager.ShoppingList.ShoppingListEntry(null, null);
 
+        if (!sender.hasPermission("barterchests.shopping-list")) {
+            sender.sendMessage(Messages.mm("commands.common.no_permission"));
+            return true;
+        }
 
-        List<ShoppingListManager.ShoppingList.ShoppingListEntry> entries = new ArrayList<>();
-        entries.addAll(manager.getShoppingList(player).toDisplayList());
+        // Special "add new item" entry used as a placeholder in the list.
+        ShoppingListManager.ShoppingList.ShoppingListEntry specialAddEntry =
+                new ShoppingListManager.ShoppingList.ShoppingListEntry(null, null);
+
+        // Collect current entries + add the special “+” entry at the end.
+        List<ShoppingListManager.ShoppingList.ShoppingListEntry> entries =
+                new ArrayList<>(manager.getShoppingList(player).toDisplayList());
         entries.add(specialAddEntry);
 
-        ListPaginator<ShoppingListManager.ShoppingList.ShoppingListEntry> entryListPaginator = new ListPaginator<>(entries, 13);
+        // Paginate entries (13 per page).
+        ListPaginator<ShoppingListManager.ShoppingList.ShoppingListEntry> entryListPaginator =
+                new ListPaginator<>(entries, 13);
+
+        // Build Adventure pages.
         List<Component> pages = new ArrayList<>();
         for (int i = 0; i < entryListPaginator.getTotalPages(); i++) {
             TextComponent.Builder builder = Component.text();
             for (ShoppingListManager.ShoppingList.ShoppingListEntry record : entryListPaginator.getPage(i)) {
                 if (record != specialAddEntry) {
-                    builder.append(record.styled().append(Component.space().append(BarterContainer.INSTANCE.getConfiguration().getShoppingListX()).clickEvent(ClickEvent.callback(audience -> {
-                        audience.sendMessage(
-                                MiniMessage.miniMessage().deserialize(
-                                        BarterContainer.INSTANCE.getConfiguration().getShoppingListRemoveItemMessage(),
-                                        Placeholder.parsed("amount", "all"),
-                                        Placeholder.parsed("item", record.itemStack().getType().key().asString())
-                                )
-                        );
-                        manager.removeItem((Player) audience, record.itemStack());
-                    })))).appendNewline();
+                    // Regular entry: show styled component + ❌ clickable to remove item.
+                    builder.append(record.styled()
+                            .append(Component.space()
+                                    .append(BarterContainer.INSTANCE.getConfiguration().getShoppingListX())
+                                    .clickEvent(ClickEvent.callback(audience -> {
+                                        audience.sendMessage(
+                                                MiniMessage.miniMessage().deserialize(
+                                                        BarterContainer.INSTANCE.getConfiguration().getShoppingListRemoveItemMessage(),
+                                                        Placeholder.parsed("amount", "all"),
+                                                        Placeholder.parsed("item", record.itemStack().getType().key().asString())
+                                                )
+                                        );
+                                        manager.removeItem((Player) audience, record.itemStack());
+                                    })))).appendNewline();
                 } else {
-                    builder.append(BarterContainer.INSTANCE.getConfiguration().getShoppingListPlus()).clickEvent(ClickEvent.callback(audience -> {
-                        if (audience instanceof Player player1) {
-                            player1.closeInventory();
-                            new ShoppingListGui(player1).show(player1);
-                        }
-                    })).appendNewline();
+                    // Special "add new item" entry: ➕ button opens ShoppingListGui.
+                    builder.append(BarterContainer.INSTANCE.getConfiguration().getShoppingListPlus())
+                            .clickEvent(ClickEvent.callback(audience -> {
+                                if (audience instanceof Player player1) {
+                                    player1.closeInventory();
+                                    new ShoppingListGui(player1).show(player1);
+                                }
+                            }))
+                            .appendNewline();
                 }
             }
             pages.add(builder.build());
         }
 
+        // Open the interactive book UI with built pages.
         player.openBook(Book.book(Component.text("Data"), Component.text("?"), pages));
-
         return true;
     }
 }

@@ -1,64 +1,53 @@
 package com.stifflered.bartercontainer.gui.tree.buttons;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
+
 import com.stifflered.bartercontainer.BarterContainer;
+import com.stifflered.bartercontainer.gui.tree.LogBookHubGui;
 import com.stifflered.bartercontainer.store.BarterStore;
-import com.stifflered.bartercontainer.util.BarterShopOwnerLogManager;
 import com.stifflered.bartercontainer.util.Components;
 import com.stifflered.bartercontainer.util.ItemUtil;
-import com.stifflered.bartercontainer.util.ListPaginator;
-import net.kyori.adventure.inventory.Book;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Material;
+import com.stifflered.bartercontainer.util.Messages;
+
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.entity.Player;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+/**
+ * GUI button that opens the new 9-slot "Logs & Analytics" hub.
 
+ * Previous behavior:
+ *  - Opened a loading book and asynchronously built paginated transaction logs.
+
+ * New behavior (temporary / inert):
+ *  - Immediately opens {@link LogBookHubGui} (icons do nothing yet).
+ *  - No async work, no book UI. Click-cancelling is handled centrally by BarterInventoryListener.
+ */
 public class ViewLogsGuiItem extends GuiItem {
 
-    private static final Book LOADING = Book.book(Component.text(""), Component.text(""), List.of(Component.text("Loading...")));
-
+    /**
+     * Constructs a GUI button for viewing logs of the given store.
+     * The store is accepted for API compatibility; not used yet.
+     *
+     * @param store The barter store whose logs/analytics are to be explored.
+     */
     public ViewLogsGuiItem(BarterStore store) {
-        super(BarterContainer.INSTANCE.getConfiguration().getViewLogsItem(), (event) -> {
-            HumanEntity clicker = event.getWhoClicked();
-
-            clicker.openBook(LOADING);
-            new BukkitRunnable(){
-
-                @Override
-                public void run() {
-                    try {
-                        ListPaginator<BarterShopOwnerLogManager.TransactionRecord> recordListPaginator = new ListPaginator<>(BarterShopOwnerLogManager.listAllEntries(store.getKey()).reversed(), 13);
-                        List<Component> pages = new ArrayList<>();
-                        for (int i = 0; i < Math.min(recordListPaginator.getTotalPages(), 10); i++) { // max of 10
-                            TextComponent.Builder builder = Component.text();
-                            for (BarterShopOwnerLogManager.TransactionRecord record : recordListPaginator.getPage(i)) {
-                                builder.append(record.formatted()).appendNewline();
-                            }
-                            pages.add(builder.build());
+        super(
+                // Display item defined in configuration (view-logs-item),
+                // but name/lore are from messages.yml to keep text centralized.
+                ItemUtil.wrapEdit(
+                        BarterContainer.INSTANCE.getConfiguration().getViewLogsItem(),
+                        meta -> {
+                            Components.name(meta, Messages.mm("gui.tree.view_logs.name"));
+                            Components.lore(meta, Messages.mmList("gui.tree.view_logs.lore"));
                         }
-                        new BukkitRunnable(){
-
-                            @Override
-                            public void run() {
-                                clicker.openBook(Book.book(Component.text("Data"), Component.text("?"), pages));
-                            }
-                        }.runTask(BarterContainer.INSTANCE);
-                    } catch (IOException e) {
-                        clicker.closeInventory();
-                        clicker.sendMessage(Component.text("Failed to open logs!", NamedTextColor.RED));
+                ),
+                event -> {
+                    HumanEntity clicker = event.getWhoClicked();
+                    if (clicker instanceof Player player) {
+                        LogBookHubGui.open(player, store);
                     }
+                    // No further action; central listener will handle cancelling interactions.
                 }
-            }.runTaskAsynchronously(BarterContainer.INSTANCE);
-        });
+        );
     }
-
-
 }
