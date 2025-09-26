@@ -26,11 +26,12 @@ import java.util.List;
  */
 public class ShoppingListGui extends CatalogueGui {
 
-    /** The player viewing/using this GUI. */
-    private final Player player;
+    public static void open(Player player) {
+        ShoppingListGui.loadAndOpen(null, player, ShoppingListGui::new, ShoppingListGui::formatItem);
+    }
 
-    public ShoppingListGui(Player player) {
-        this.player = player;
+    private ShoppingListGui(List<GuiItem> items, String query) {
+        super(items, query);
     }
 
     /**
@@ -45,20 +46,19 @@ public class ShoppingListGui extends CatalogueGui {
      *  - gui.shopping.remove   → placeholders: <amount>, <item>
      *  - gui.shopping.not_removed (no placeholders)
      */
-    @Override
-    protected GuiItem formatItem(ItemStack baseItem, List<BarterStore> items) {
+    private static GuiItem formatItem(ItemStack baseItem, List<BarterStore> items) {
         return new GuiItem(ItemUtil.wrapEdit(baseItem.clone(), (meta) -> {
             // Apply lore lines defined for the shopping list context (from messages.yml)
             Components.lore(meta, Messages.mmList("gui.shopping.lore"));
         }), clickEvent -> {
-            Player clicker = (Player) clickEvent.getWhoClicked();
+            Player player = (Player) clickEvent.getWhoClicked();
 
             // Shift-click boosts amount from 1 → 10 for both add and receive operations
             int amount = clickEvent.isShiftClick() ? 10 : 1;
 
             if (clickEvent.isRightClick()) {
                 // RIGHT CLICK: Add item to the player's shopping list
-                BarterContainer.INSTANCE.getShoppingListManager().addItem(clicker, baseItem, amount);
+                BarterContainer.INSTANCE.getShoppingListManager().addItem(player, baseItem, amount);
                 player.sendMessage(
                         Messages.mm("gui.shopping.add",
                                 "amount", String.valueOf(amount),
@@ -68,7 +68,7 @@ public class ShoppingListGui extends CatalogueGui {
             } else {
                 // LEFT CLICK: Receive (decrement) the item from the player's list
                 ShoppingListManager.MutateState state =
-                        BarterContainer.INSTANCE.getShoppingListManager().receive(clicker, baseItem, amount);
+                        BarterContainer.INSTANCE.getShoppingListManager().receive(player, baseItem, amount);
 
                 // Feedback varies by mutation result:
                 //  - MODIFIED or REMOVED → success message (with placeholders)

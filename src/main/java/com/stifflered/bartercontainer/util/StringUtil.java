@@ -150,4 +150,75 @@ public class StringUtil {
     public static String plural(String string, long number) {
         return number == 1 ? string : string + "s";
     }
+
+    public static boolean fuzzyContains(String targetNorm, String queryNorm) {
+        if (targetNorm.contains(queryNorm)) return true;
+
+        String[] targetTokens = targetNorm.split(" ");
+        String[] queryTokens  = queryNorm.split(" ");
+
+        for (String q : queryTokens) {
+            boolean matched = false;
+            for (String t : targetTokens) {
+                if (t.isEmpty()) continue;
+
+                // 1) exact token match always OK
+                if (t.equals(q)) { matched = true; break; }
+
+                // 2) short queries (<=3) must match a whole token, not substring
+                if (q.length() <= 3) continue;
+
+                // 3) only allow targetToken to contain the query (not the reverse)
+                if (t.length() >= 3 && t.contains(q)) { matched = true; break; }
+
+                // 4) edit distance as a fallback for typos
+                int d = damerauLevenshtein(t, q);
+                int maxLen = Math.max(t.length(), q.length());
+                int tol = Math.max(1, (int) Math.floor(maxLen * 0.34));
+                if (d <= tol) { matched = true; break; }
+            }
+            if (!matched) return false;
+        }
+        return true;
+    }
+
+    public static int damerauLevenshtein(String a, String b) {
+        int n = a.length(), m = b.length();
+        if (n == 0) return m;
+        if (m == 0) return n;
+        int[][] dp = new int[n + 1][m + 1];
+        for (int i = 0; i <= n; i++) dp[i][0] = i;
+        for (int j = 0; j <= m; j++) dp[0][j] = j;
+        for (int i = 1; i <= n; i++) {
+            char ca = a.charAt(i - 1);
+            for (int j = 1; j <= m; j++) {
+                char cb = b.charAt(j - 1);
+                int cost = (ca == cb) ? 0 : 1;
+                dp[i][j] = Math.min(
+                        Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1),
+                        dp[i - 1][j - 1] + cost
+                );
+                if (i > 1 && j > 1 && ca == b.charAt(j - 2) && a.charAt(i - 2) == cb) {
+                    dp[i][j] = Math.min(dp[i][j], dp[i - 2][j - 2] + 1);
+                }
+            }
+        }
+        return dp[n][m];
+    }
+
+    public static String toRoman(int n) {
+        return switch (n) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            case 6 -> "VI";
+            case 7 -> "VII";
+            case 8 -> "VIII";
+            case 9 -> "IX";
+            case 10 -> "X";
+            default -> "";
+        };
+    }
 }

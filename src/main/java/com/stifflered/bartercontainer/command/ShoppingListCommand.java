@@ -103,7 +103,7 @@ public class ShoppingListCommand implements CommandExecutor {
                             .clickEvent(ClickEvent.callback(audience -> {
                                 if (audience instanceof Player player1) {
                                     player1.closeInventory();
-                                    new ShoppingListGui(player1).show(player1);
+                                    ShoppingListGui.open(player1);
                                 }
                             }))
                             .appendNewline();

@@ -40,7 +40,7 @@ public class CatalogueCommand implements CommandExecutor {
             return true;
         }
 
-        new CatalogueGui().show(player);
+        CatalogueGui.loadAndOpen(null, player);
         return true;
     }
 }
